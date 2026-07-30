@@ -1,0 +1,921 @@
+{
+  "name": "TEST_SCENE",
+  "type": "SCENE",
+  "components": [
+    {
+      "type": "TEXT",
+      "x": 5,
+      "y": 5,
+      "text": "Back",
+      "color": "#FFFFFF",
+      "font_size": 24
+    },
+    {
+      "type": "RECT",
+      "x": 100,
+      "y": 0,
+      "children": [
+        {
+          "type": "RECT",
+          "x": 0,
+          "y": 0,
+          "width": 51,
+          "height": 51,
+          "background_color": "#ADC193",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 61,
+          "y": 0,
+          "width": 51,
+          "height": 51,
+          "background_color": "#32D7E7",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 122,
+          "y": 0,
+          "width": 51,
+          "height": 51,
+          "background_color": "#EA89EC",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 183,
+          "y": 0,
+          "width": 51,
+          "height": 51,
+          "background_color": "#47ABAB",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 244,
+          "y": 0,
+          "width": 51,
+          "height": 51,
+          "background_color": "#76379E",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 305,
+          "y": 0,
+          "width": 51,
+          "height": 51,
+          "background_color": "#FF5EFB",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 366,
+          "y": 0,
+          "width": 51,
+          "height": 51,
+          "background_color": "#5DE81F",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 427,
+          "y": 0,
+          "width": 51,
+          "height": 51,
+          "background_color": "#0D260F",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 488,
+          "y": 0,
+          "width": 51,
+          "height": 51,
+          "background_color": "#23359B",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 549,
+          "y": 0,
+          "width": 51,
+          "height": 51,
+          "background_color": "#5932CC",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 0,
+          "y": 61,
+          "width": 51,
+          "height": 51,
+          "background_color": "#C4E6CF",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 61,
+          "y": 61,
+          "width": 51,
+          "height": 51,
+          "background_color": "#C0D290",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 122,
+          "y": 61,
+          "width": 51,
+          "height": 51,
+          "background_color": "#08566B",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 183,
+          "y": 61,
+          "width": 51,
+          "height": 51,
+          "background_color": "#BDDFDF",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 244,
+          "y": 61,
+          "width": 51,
+          "height": 51,
+          "background_color": "#984CD0",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 305,
+          "y": 61,
+          "width": 51,
+          "height": 51,
+          "background_color": "#A49D95",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 366,
+          "y": 61,
+          "width": 51,
+          "height": 51,
+          "background_color": "#D69AB3",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 427,
+          "y": 61,
+          "width": 51,
+          "height": 51,
+          "background_color": "#51761A",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 488,
+          "y": 61,
+          "width": 51,
+          "height": 51,
+          "background_color": "#C646F2",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 549,
+          "y": 61,
+          "width": 51,
+          "height": 51,
+          "background_color": "#458106",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 0,
+          "y": 122,
+          "width": 51,
+          "height": 51,
+          "background_color": "#B24529",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 61,
+          "y": 122,
+          "width": 51,
+          "height": 51,
+          "background_color": "#AF2056",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 122,
+          "y": 122,
+          "width": 51,
+          "height": 51,
+          "background_color": "#CC6199",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 183,
+          "y": 122,
+          "width": 51,
+          "height": 51,
+          "background_color": "#061149",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 244,
+          "y": 122,
+          "width": 51,
+          "height": 51,
+          "background_color": "#E686D8",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 305,
+          "y": 122,
+          "width": 51,
+          "height": 51,
+          "background_color": "#DD8D0B",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 366,
+          "y": 122,
+          "width": 51,
+          "height": 51,
+          "background_color": "#0EE041",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 427,
+          "y": 122,
+          "width": 51,
+          "height": 51,
+          "background_color": "#71DDBF",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 488,
+          "y": 122,
+          "width": 51,
+          "height": 51,
+          "background_color": "#206A81",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 549,
+          "y": 122,
+          "width": 51,
+          "height": 51,
+          "background_color": "#FEEEDB",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 0,
+          "y": 183,
+          "width": 51,
+          "height": 51,
+          "background_color": "#AB705F",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 61,
+          "y": 183,
+          "width": 51,
+          "height": 51,
+          "background_color": "#2EFFC0",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 122,
+          "y": 183,
+          "width": 51,
+          "height": 51,
+          "background_color": "#A3F080",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 183,
+          "y": 183,
+          "width": 51,
+          "height": 51,
+          "background_color": "#E9ED9D",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 244,
+          "y": 183,
+          "width": 51,
+          "height": 51,
+          "background_color": "#87B55A",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 305,
+          "y": 183,
+          "width": 51,
+          "height": 51,
+          "background_color": "#DA739E",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 366,
+          "y": 183,
+          "width": 51,
+          "height": 51,
+          "background_color": "#1D1E7E",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 427,
+          "y": 183,
+          "width": 51,
+          "height": 51,
+          "background_color": "#434B5D",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 488,
+          "y": 183,
+          "width": 51,
+          "height": 51,
+          "background_color": "#6D717B",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 549,
+          "y": 183,
+          "width": 51,
+          "height": 51,
+          "background_color": "#CF9F03",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 0,
+          "y": 244,
+          "width": 51,
+          "height": 51,
+          "background_color": "#09CCE7",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 61,
+          "y": 244,
+          "width": 51,
+          "height": 51,
+          "background_color": "#360FAA",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 122,
+          "y": 244,
+          "width": 51,
+          "height": 51,
+          "background_color": "#1759A0",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 183,
+          "y": 244,
+          "width": 51,
+          "height": 51,
+          "background_color": "#E2375D",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 244,
+          "y": 244,
+          "width": 51,
+          "height": 51,
+          "background_color": "#B6ADD9",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 305,
+          "y": 244,
+          "width": 51,
+          "height": 51,
+          "background_color": "#D9CE01",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 366,
+          "y": 244,
+          "width": 51,
+          "height": 51,
+          "background_color": "#83D1B8",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 427,
+          "y": 244,
+          "width": 51,
+          "height": 51,
+          "background_color": "#8BA1E0",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 488,
+          "y": 244,
+          "width": 51,
+          "height": 51,
+          "background_color": "#8066A3",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 549,
+          "y": 244,
+          "width": 51,
+          "height": 51,
+          "background_color": "#DE1261",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 0,
+          "y": 305,
+          "width": 51,
+          "height": 51,
+          "background_color": "#4AD80A",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 61,
+          "y": 305,
+          "width": 51,
+          "height": 51,
+          "background_color": "#5AB912",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 122,
+          "y": 305,
+          "width": 51,
+          "height": 51,
+          "background_color": "#95E0C3",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 183,
+          "y": 305,
+          "width": 51,
+          "height": 51,
+          "background_color": "#59D774",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 244,
+          "y": 305,
+          "width": 51,
+          "height": 51,
+          "background_color": "#608EC9",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 305,
+          "y": 305,
+          "width": 51,
+          "height": 51,
+          "background_color": "#6BCBE6",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 366,
+          "y": 305,
+          "width": 51,
+          "height": 51,
+          "background_color": "#BA20BC",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 427,
+          "y": 305,
+          "width": 51,
+          "height": 51,
+          "background_color": "#FE4683",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 488,
+          "y": 305,
+          "width": 51,
+          "height": 51,
+          "background_color": "#112E11",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 549,
+          "y": 305,
+          "width": 51,
+          "height": 51,
+          "background_color": "#E23B78",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 0,
+          "y": 366,
+          "width": 51,
+          "height": 51,
+          "background_color": "#F099A3",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 61,
+          "y": 366,
+          "width": 51,
+          "height": 51,
+          "background_color": "#0FD6F6",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 122,
+          "y": 366,
+          "width": 51,
+          "height": 51,
+          "background_color": "#4BCE9E",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 183,
+          "y": 366,
+          "width": 51,
+          "height": 51,
+          "background_color": "#2340CD",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 244,
+          "y": 366,
+          "width": 51,
+          "height": 51,
+          "background_color": "#E00F66",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 305,
+          "y": 366,
+          "width": 51,
+          "height": 51,
+          "background_color": "#236685",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 366,
+          "y": 366,
+          "width": 51,
+          "height": 51,
+          "background_color": "#1277B2",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 427,
+          "y": 366,
+          "width": 51,
+          "height": 51,
+          "background_color": "#3997C9",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 488,
+          "y": 366,
+          "width": 51,
+          "height": 51,
+          "background_color": "#2A499F",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 549,
+          "y": 366,
+          "width": 51,
+          "height": 51,
+          "background_color": "#DFDF66",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 0,
+          "y": 427,
+          "width": 51,
+          "height": 51,
+          "background_color": "#784B70",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 61,
+          "y": 427,
+          "width": 51,
+          "height": 51,
+          "background_color": "#066843",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 122,
+          "y": 427,
+          "width": 51,
+          "height": 51,
+          "background_color": "#B57F39",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 183,
+          "y": 427,
+          "width": 51,
+          "height": 51,
+          "background_color": "#1FA7A2",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 244,
+          "y": 427,
+          "width": 51,
+          "height": 51,
+          "background_color": "#41A73F",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 305,
+          "y": 427,
+          "width": 51,
+          "height": 51,
+          "background_color": "#009EB9",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 366,
+          "y": 427,
+          "width": 51,
+          "height": 51,
+          "background_color": "#B9797E",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 427,
+          "y": 427,
+          "width": 51,
+          "height": 51,
+          "background_color": "#4F1869",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 488,
+          "y": 427,
+          "width": 51,
+          "height": 51,
+          "background_color": "#8BB2F4",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 549,
+          "y": 427,
+          "width": 51,
+          "height": 51,
+          "background_color": "#D1CAA9",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 0,
+          "y": 488,
+          "width": 51,
+          "height": 51,
+          "background_color": "#73D237",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 61,
+          "y": 488,
+          "width": 51,
+          "height": 51,
+          "background_color": "#76EC9B",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 122,
+          "y": 488,
+          "width": 51,
+          "height": 51,
+          "background_color": "#784EC8",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 183,
+          "y": 488,
+          "width": 51,
+          "height": 51,
+          "background_color": "#C44152",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 244,
+          "y": 488,
+          "width": 51,
+          "height": 51,
+          "background_color": "#761B13",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 305,
+          "y": 488,
+          "width": 51,
+          "height": 51,
+          "background_color": "#6DED83",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 366,
+          "y": 488,
+          "width": 51,
+          "height": 51,
+          "background_color": "#697950",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 427,
+          "y": 488,
+          "width": 51,
+          "height": 51,
+          "background_color": "#7E4B3D",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 488,
+          "y": 488,
+          "width": 51,
+          "height": 51,
+          "background_color": "#3CF57E",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 549,
+          "y": 488,
+          "width": 51,
+          "height": 51,
+          "background_color": "#6DD2D5",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 0,
+          "y": 549,
+          "width": 51,
+          "height": 51,
+          "background_color": "#1EAD4A",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 61,
+          "y": 549,
+          "width": 51,
+          "height": 51,
+          "background_color": "#40F273",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 122,
+          "y": 549,
+          "width": 51,
+          "height": 51,
+          "background_color": "#3F26D8",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 183,
+          "y": 549,
+          "width": 51,
+          "height": 51,
+          "background_color": "#D9D480",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 244,
+          "y": 549,
+          "width": 51,
+          "height": 51,
+          "background_color": "#2BA2AC",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 305,
+          "y": 549,
+          "width": 51,
+          "height": 51,
+          "background_color": "#7A1E4F",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 366,
+          "y": 549,
+          "width": 51,
+          "height": 51,
+          "background_color": "#F3EDCC",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 427,
+          "y": 549,
+          "width": 51,
+          "height": 51,
+          "background_color": "#D47231",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 488,
+          "y": 549,
+          "width": 51,
+          "height": 51,
+          "background_color": "#7396C7",
+          "opacity": 0.6
+        },
+        {
+          "type": "RECT",
+          "x": 549,
+          "y": 549,
+          "width": 51,
+          "height": 51,
+          "background_color": "#A57CBD",
+          "opacity": 0.6
+        }
+      ]
+    }
+  ]
+}

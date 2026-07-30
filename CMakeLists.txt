@@ -31,7 +31,18 @@ if(USE_SDL_TTF)
 endif()
 
 # ---- 主程序 ----
-add_executable(main WIN32 main.c)
+add_executable(main WIN32
+    src/main.c
+    src/utils/utils.c
+    src/engine/image/image.c
+    src/engine/music/music.c
+    src/scenes/main_scene/main_scene.c
+    src/scenes/test_scene/test_scene.c
+    src/platform/platform.c
+    three-party/cJSON/cJSON.c
+)
+
+target_include_directories(main PRIVATE src three-party three-party/cJSON)
 
 # 链接 SDL3
 target_link_libraries(main PRIVATE SDL3::SDL3)
@@ -45,4 +56,32 @@ if(USE_SDL_MIXER)
 endif()
 if(USE_SDL_TTF)
     target_link_libraries(main PRIVATE SDL3_ttf::SDL3_ttf)
+endif()
+
+# ---- 复制 DLL 和资源到输出目录 ----
+add_custom_command(TARGET main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:SDL3::SDL3>
+        "$<TARGET_FILE_DIR:main>"
+)
+# 每次 build 都同步 assets（即使 main 没重新编译）
+add_custom_target(sync_assets ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/src/assets"
+        "$<TARGET_FILE_DIR:main>/assets"
+    DEPENDS main
+)
+if(USE_SDL_IMAGE)
+    add_custom_command(TARGET main POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:SDL3_image::SDL3_image>
+            "$<TARGET_FILE_DIR:main>"
+    )
+endif()
+if(USE_SDL_MIXER)
+    add_custom_command(TARGET main POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:SDL3_mixer::SDL3_mixer>
+            "$<TARGET_FILE_DIR:main>"
+    )
 endif()

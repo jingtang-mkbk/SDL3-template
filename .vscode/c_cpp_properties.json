@@ -3,7 +3,9 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/three-party",
+                "${workspaceFolder}/three-party/cJSON",
                 "${workspaceFolder}/three-party/SDL/include",
                 "${workspaceFolder}/three-party/SDL_image/include",
                 "${workspaceFolder}/three-party/SDL_mixer/include",

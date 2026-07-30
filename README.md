@@ -34,21 +34,28 @@ git submodule update --init --recursive
 
 子模块均已锁定在最新的 release tag，无需跟踪分支。
 
-### 2. Windows 环境准备（MinGW）
+### 2. Windows 环境准备（MSYS2 UCRT64）
 
-SDL3 的 OpenGL ES 后端需要 ANGLE 头文件：
+需要在 **MSYS2 UCRT64 终端**中安装以下依赖：
 
 ```bash
+# 构建工具（CMake 3.x，系统 CMake 4.1 不兼容 SDL 子模块）
+pacman -S mingw-w64-ucrt-x86_64-cmake
+
+# SDL 依赖
 pacman -S mingw-w64-ucrt-x86_64-angleproject
+pacman -S mingw-w64-ucrt-x86_64-freetype
 ```
 
 ### 3. 编译
 
-项目使用 CMake `add_subdirectory` 将 SDL 源码作为子项目编译，**无需手动安装**：
+项目使用 CMake `add_subdirectory` 将 SDL 源码作为子项目编译，**无需手动安装**。
+
+> 必须使用 MSYS2 的 CMake，而非系统 CMake：
 
 ```bash
-cmake -S . -B build
-cmake --build build
+/ucrt64/bin/cmake -S . -B build -G "Unix Makefiles"
+/ucrt64/bin/cmake --build build -j 12
 ```
 
 如需关闭可选子模块：
