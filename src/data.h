@@ -1,29 +1,14 @@
 #ifndef DATA_H
 #define DATA_H
+
 #include <SDL3/SDL.h>
 #include "stb_ds.h"
 
-/* Convenience: cast state->scene_data to the scene's local type */
+/* ---- Convenience macro ---- */
 #define SCENE_DATA(state, Type) ((Type *)(state)->scene_data)
 
 /* Forward declarations */
 typedef struct AppState AppState;
-typedef struct Image Image;
-
-/* A sprite on screen: image + position + display size */
-typedef struct Sprite
-{
-  Image *img;
-  float x, y;
-  float w, h;
-} Sprite;
-
-/* Hash map entry: string name → Sprite */
-typedef struct SpriteEntry
-{
-  char *key;
-  Sprite value;
-} SpriteEntry;
 
 /* Scene interface — like a virtual table, one per scene */
 typedef struct Scene

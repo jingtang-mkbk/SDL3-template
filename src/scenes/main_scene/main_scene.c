@@ -1,23 +1,36 @@
 #include "main_scene.h"
-#include "../../engine/music/music.h"
+#include "manager/manager.h"
+#include "ui/text.h"
 
 static void init(AppState *state)
 {
   MainSceneData *d = (MainSceneData *)SDL_calloc(1, sizeof(MainSceneData));
   state->scene_data = d;
 
-  const char *text = "Switch";
-  d->text_scale = SDL_GetWindowDisplayScale(state->window) * 4.0f;
-  d->text_w = SDL_strlen(text) * SDL_DEBUG_TEXT_FONT_CHARACTER_SIZE;
-  d->text_h = SDL_DEBUG_TEXT_FONT_CHARACTER_SIZE;
+  // 初始化 Switch 文字
+  d->switch_tex = (Text){
+      .text = "Switch",
+      .path = "assets/fonts/MSYH.TTC",
+      .font_size = 48.0f,
+      .color = (SDL_Color){255, 255, 255, 255},
+  };
+  text_init(manager, &d->switch_tex);
+  int pixel_w, pixel_h;
+  SDL_GetCurrentRenderOutputSize(state->renderer, &pixel_w, &pixel_h);
+  d->switch_tex.rect.x = (pixel_w - d->switch_tex.rect.w) / 2.0f;
+  d->switch_tex.rect.y = (pixel_h - d->switch_tex.rect.h) / 2.0f;
 
-  /* Load images into sprite map */
-  init_sprite(&d->sprites, state->renderer,
-              "tiger", "assets/imgs/gs_tiger.svg", 100, 100, 200.0f, 200.0f);
+  // 初始化 tiger
+  manager.get_managers()->image_manager->load(state->renderer, "assets/imgs/gs_tiger.svg");
+  d->tiger_img = (Image){
+      .path = "assets/imgs/gs_tiger.svg",
+      .rect = {100, 100, 200, 200},
+  };
+  image_init(manager, &d->tiger_img);
 
   /* Start background music */
-  if (music_init("assets/music/the_entertainer.ogg"))
-    music_play();
+  manager.get_managers()->music_manager->load("assets/music/the_entertainer.ogg");
+  manager.get_managers()->music_manager->play("assets/music/the_entertainer.ogg");
 }
 
 static void event(AppState *state, SDL_Event *event)
@@ -39,12 +52,12 @@ static void event(AppState *state, SDL_Event *event)
     mx = event->button.x;
     my = event->button.y;
 
-    float tw = d->text_w * d->text_scale;
-    float th = d->text_h * d->text_scale;
-    if (mx >= d->text_x && mx <= d->text_x + tw &&
-        my >= d->text_y && my <= d->text_y + th)
+    float tw = d->switch_tex.rect.w;
+    float th = d->switch_tex.rect.h;
+    if (mx >= d->switch_tex.rect.x && mx <= d->switch_tex.rect.x + tw &&
+        my >= d->switch_tex.rect.y && my <= d->switch_tex.rect.y + th)
     {
-      state->switch_scene(state, "test_scene");
+      state->switch_scene(state, "minesweeper_scene");
     }
   }
 }
@@ -52,26 +65,14 @@ static void event(AppState *state, SDL_Event *event)
 static void iterate(AppState *state)
 {
   MainSceneData *d = SCENE_DATA(state, MainSceneData);
-  int pixel_w, pixel_h;
-  SDL_GetCurrentRenderOutputSize(state->renderer, &pixel_w, &pixel_h);
-
-  float tw = d->text_w * d->text_scale;
-  float th = d->text_h * d->text_scale;
-  d->text_x = (pixel_w - tw) / 2.0f;
-  d->text_y = (pixel_h - th) / 2.0f;
 
   SDL_SetRenderDrawColor(state->renderer, 50, 50, 50, 255);
   SDL_RenderClear(state->renderer);
 
-  render_sprite(state->renderer, &d->sprites, "tiger");
+  image_render(state->renderer, &d->tiger_img);
 
-  SDL_SetRenderScale(state->renderer, d->text_scale, d->text_scale);
-  SDL_SetRenderDrawColor(state->renderer, 255, 255, 255, 255);
-  SDL_RenderDebugText(state->renderer,
-                      d->text_x / d->text_scale,
-                      d->text_y / d->text_scale,
-                      "Switch");
-  SDL_SetRenderScale(state->renderer, 1.0f, 1.0f);
+  /* TTF 文字渲染 */
+  text_render(state->renderer, manager, &d->switch_tex);
 
   SDL_RenderPresent(state->renderer);
 }
@@ -79,8 +80,9 @@ static void iterate(AppState *state)
 static void deinit(AppState *state)
 {
   MainSceneData *d = SCENE_DATA(state, MainSceneData);
-  music_deinit();
-  deinit_sprites(&d->sprites);
+  manager.get_managers()->music_manager->pause("assets/music/the_entertainer.ogg");
+  image_deinit();
+  text_deinit();
   SDL_free(state->scene_data);
   state->scene_data = NULL;
 }

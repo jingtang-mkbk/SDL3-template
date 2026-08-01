@@ -1,0 +1,31 @@
+#ifndef MANAGER_H
+#define MANAGER_H
+
+// clang-format off
+#define MANAGER_FLAG_FONT  0x01u
+#define MANAGER_FLAG_IMAGE 0x02u
+#define MANAGER_FLAG_MUSIC 0x04u
+// clang-format on
+
+#include "data.h"
+#include "manager/font_manager.h"
+#include "manager/image_manager.h"
+#include "manager/music_manager.h"
+
+typedef struct Managers
+{
+  const FontManager *font_manager;
+  const ImageManager *image_manager;
+  const MusicManager *music_manager;
+} Managers;
+
+typedef struct Manager
+{
+  void (*init)(Uint8 flags);
+  void (*deinit)(void);
+  Managers *(*get_managers)(void);
+} Manager;
+
+extern const Manager manager;
+
+#endif /* MANAGER_H */

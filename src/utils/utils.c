@@ -1,5 +1,4 @@
 #include "utils.h"
-#include <stdio.h>
 
 Color parse_color(const char *hex)
 {

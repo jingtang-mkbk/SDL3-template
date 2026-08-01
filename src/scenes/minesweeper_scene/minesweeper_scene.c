@@ -1,22 +1,23 @@
-#include "test_scene.h"
-#include "cJSON.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "minesweeper_scene.h"
+#include "manager/manager.h"
 
 static void init(AppState *state)
 {
-  TestSceneData *d = (TestSceneData *)SDL_calloc(1, sizeof(TestSceneData));
+  MinesweeperSceneData *d = (MinesweeperSceneData *)SDL_calloc(1, sizeof(MinesweeperSceneData));
   state->scene_data = d;
 
   d->hover_row = -1;
   d->hover_col = -1;
 
-  SDL_strlcpy(d->back.text, "Back", sizeof(d->back.text));
-  d->back.color = (Color){255, 255, 255};
-  d->back.x = 5;
-  d->back.y = 5;
-  d->text_scale = SDL_GetWindowDisplayScale(state->window) * 2.0f;
+  /* 初始化 Back 文字 */
+  d->back_tex = (Text){
+      .text = "Back",
+      .path = "assets/fonts/MSYH.TTC",
+      .font_size = 24.0f,
+      .color = (SDL_Color){255, 255, 255, 255},
+      .rect = {5, 5, 0, 0},
+  };
+  text_init(manager, &d->back_tex);
 
   SDL_IOStream *io = SDL_IOFromFile("assets/minesweeper_scene.json", "r");
   if (!io)
@@ -45,16 +46,19 @@ static void init(AppState *state)
     {
       cJSON *bt = cJSON_GetObjectItem(comp, "text");
       if (cJSON_IsString(bt))
-        SDL_strlcpy(d->back.text, bt->valuestring, 32);
+        d->back_tex.text = bt->valuestring;
       cJSON *bc = cJSON_GetObjectItem(comp, "color");
       if (cJSON_IsString(bc))
-        d->back.color = parse_color(bc->valuestring);
+      {
+        Color c = parse_color(bc->valuestring);
+        d->back_tex.color = (SDL_Color){c.r, c.g, c.b, 255};
+      }
       cJSON *bx = cJSON_GetObjectItem(comp, "x");
       if (cJSON_IsNumber(bx))
-        d->back.x = (float)bx->valuedouble;
+        d->back_tex.rect.x = (float)bx->valuedouble;
       cJSON *by = cJSON_GetObjectItem(comp, "y");
       if (cJSON_IsNumber(by))
-        d->back.y = (float)by->valuedouble;
+        d->back_tex.rect.y = (float)by->valuedouble;
     }
     else if (SDL_strcmp(type->valuestring, "RECT") == 0)
     {
@@ -82,14 +86,11 @@ static void init(AppState *state)
       }
     }
   }
-
-  d->text_w = SDL_strlen(d->back.text) * SDL_DEBUG_TEXT_FONT_CHARACTER_SIZE;
-  d->text_h = SDL_DEBUG_TEXT_FONT_CHARACTER_SIZE;
 }
 
 static void event(AppState *state, SDL_Event *event)
 {
-  TestSceneData *d = SCENE_DATA(state, TestSceneData);
+  MinesweeperSceneData *d = SCENE_DATA(state, MinesweeperSceneData);
 
   if (event->type == SDL_EVENT_KEY_DOWN ||
       event->type == SDL_EVENT_QUIT)
@@ -110,8 +111,8 @@ static void event(AppState *state, SDL_Event *event)
     {
       cJSON *jx = cJSON_GetObjectItem(ch, "x");
       cJSON *jy = cJSON_GetObjectItem(ch, "y");
-      cJSON *jw = cJSON_GetObjectItem(ch, "width");
-      cJSON *jh = cJSON_GetObjectItem(ch, "height");
+      cJSON *jw = cJSON_GetObjectItem(ch, "w");
+      cJSON *jh = cJSON_GetObjectItem(ch, "h");
       float cx = d->parent_x + (cJSON_IsNumber(jx) ? (float)jx->valuedouble : 0);
       float cy = d->parent_y + (cJSON_IsNumber(jy) ? (float)jy->valuedouble : 0);
       float cw = cJSON_IsNumber(jw) ? (float)jw->valuedouble : 51;
@@ -125,15 +126,15 @@ static void event(AppState *state, SDL_Event *event)
     }
   }
 
-  if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && d->children)
+  if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
+      event->button.button == SDL_BUTTON_LEFT && d->children)
   {
     SDL_ConvertEventToRenderCoordinates(state->renderer, event);
     float mx = event->button.x, my = event->button.y;
 
     /* Back */
-    float s = d->text_scale;
-    float bx = d->back.x * s, by = d->back.y * s;
-    float bw = d->text_w * s, bh = d->text_h * s;
+    float bx = d->back_tex.rect.x, by = d->back_tex.rect.y;
+    float bw = d->back_tex.rect.w, bh = d->back_tex.rect.h;
     if (mx >= bx && mx <= bx + bw && my >= by && my <= by + bh)
     {
       state->switch_scene(state, "main_scene");
@@ -147,8 +148,8 @@ static void event(AppState *state, SDL_Event *event)
     {
       cJSON *jx = cJSON_GetObjectItem(ch, "x");
       cJSON *jy = cJSON_GetObjectItem(ch, "y");
-      cJSON *jw = cJSON_GetObjectItem(ch, "width");
-      cJSON *jh = cJSON_GetObjectItem(ch, "height");
+      cJSON *jw = cJSON_GetObjectItem(ch, "w");
+      cJSON *jh = cJSON_GetObjectItem(ch, "h");
       float cx = d->parent_x + (cJSON_IsNumber(jx) ? (float)jx->valuedouble : 0);
       float cy = d->parent_y + (cJSON_IsNumber(jy) ? (float)jy->valuedouble : 0);
       float cw = cJSON_IsNumber(jw) ? (float)jw->valuedouble : 51;
@@ -168,9 +169,9 @@ static void event(AppState *state, SDL_Event *event)
 
 static void iterate(AppState *state)
 {
-  TestSceneData *d = SCENE_DATA(state, TestSceneData);
-  int w, h;
-  SDL_GetCurrentRenderOutputSize(state->renderer, &w, &h);
+  MinesweeperSceneData *d = SCENE_DATA(state, MinesweeperSceneData);
+  // int w, h;
+  // SDL_GetCurrentRenderOutputSize(state->renderer, &w, &h);
 
   SDL_SetRenderDrawColor(state->renderer, 20, 20, 30, 255);
   SDL_RenderClear(state->renderer);
@@ -193,8 +194,8 @@ static void iterate(AppState *state)
 
       cJSON *jx = cJSON_GetObjectItem(ch, "x");
       cJSON *jy = cJSON_GetObjectItem(ch, "y");
-      cJSON *jw = cJSON_GetObjectItem(ch, "width");
-      cJSON *jh = cJSON_GetObjectItem(ch, "height");
+      cJSON *jw = cJSON_GetObjectItem(ch, "w");
+      cJSON *jh = cJSON_GetObjectItem(ch, "h");
       SDL_FRect rect = {
           d->parent_x + (cJSON_IsNumber(jx) ? (float)jx->valuedouble : 0),
           d->parent_y + (cJSON_IsNumber(jy) ? (float)jy->valuedouble : 0),
@@ -209,11 +210,8 @@ static void iterate(AppState *state)
     SDL_SetRenderDrawBlendMode(state->renderer, SDL_BLENDMODE_NONE);
   }
 
-  SDL_SetRenderScale(state->renderer, d->text_scale, d->text_scale);
-  Color bc = d->back.color;
-  SDL_SetRenderDrawColor(state->renderer, bc.r, bc.g, bc.b, 255);
-  SDL_RenderDebugText(state->renderer, d->back.x, d->back.y, d->back.text);
-  SDL_SetRenderScale(state->renderer, 1.0f, 1.0f);
+  /* 文字渲染 */
+  text_render(state->renderer, manager, &d->back_tex);
 
   SDL_RenderPresent(state->renderer);
 }
@@ -221,10 +219,11 @@ static void iterate(AppState *state)
 static void deinit(AppState *state)
 {
   SDL_free(state->scene_data);
+  text_deinit();
   state->scene_data = NULL;
 }
 
-const Scene test_scene = {
+const Scene minesweeper_scene = {
     .init = init,
     .event = event,
     .iterate = iterate,

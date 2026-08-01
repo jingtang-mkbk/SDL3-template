@@ -1,9 +1,10 @@
 #define SDL_MAIN_USE_CALLBACKS 1 /* use the callbacks instead of main() */
 #define STB_DS_IMPLEMENTATION    /* generate stb_ds function bodies in this TU */
-#include <stdlib.h>
+
 #include <SDL3/SDL_main.h>
+#include "manager/manager.h"
 #include "scenes/main_scene/main_scene.h"
-#include "scenes/test_scene/test_scene.h"
+#include "scenes/minesweeper_scene/minesweeper_scene.h"
 #include "platform/platform.h"
 
 /* Scene switcher: call with scene name string to request a switch next frame */
@@ -40,10 +41,14 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
+    /* 初始化 manager 并加载字体（必须在场景 init 之前） */
+    manager.init(MANAGER_FLAG_FONT | MANAGER_FLAG_IMAGE | MANAGER_FLAG_MUSIC);
+    manager.get_managers()->font_manager->load("assets/fonts/MSYH.TTC");
+
     /* Build scene hash map: string name → Scene* */
     state->scene_map = NULL;
     shput(state->scene_map, "main_scene", &main_scene);
-    shput(state->scene_map, "test_scene", &test_scene);
+    shput(state->scene_map, "minesweeper_scene", &minesweeper_scene);
 
     /* Boot the first scene */
     state->current_scene = &main_scene;
@@ -91,4 +96,5 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
         shfree(state->scene_map);
         SDL_free(state);
     }
+    manager.deinit();
 }

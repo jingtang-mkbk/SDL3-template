@@ -10,3 +10,6 @@
 [submodule "three-party/SDL_ttf"]
 	path = three-party/SDL_ttf
 	url = https://github.com/libsdl-org/SDL_ttf.git
+[submodule "three-party/flecs"]
+	path = three-party/flecs
+	url = https://github.com/SanderMertens/flecs.git

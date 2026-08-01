@@ -34,10 +34,14 @@ endif()
 add_executable(main WIN32
     src/main.c
     src/utils/utils.c
-    src/engine/image/image.c
-    src/engine/music/music.c
+    src/manager/manager.c
+    src/manager/font_manager.c
+    src/manager/image_manager.c
+    src/manager/music_manager.c
+    src/ui/text.c
+    src/ui/image.c
     src/scenes/main_scene/main_scene.c
-    src/scenes/test_scene/test_scene.c
+    src/scenes/minesweeper_scene/minesweeper_scene.c
     src/platform/platform.c
     three-party/cJSON/cJSON.c
 )
