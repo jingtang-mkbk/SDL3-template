@@ -14,7 +14,7 @@ void text_init(Manager manager, Text *text)
   if (!text || !text->text)
     return;
 
-  TTF_Font *font = manager.get_managers()->font_manager->get(text->path ? text->path : "assets/fonts/MSYH.TTC");
+  TTF_Font *font = manager.get_managers()->font_manager->get(text->path ? text->path : "MSYH.TTC");
   if (!font)
     return;
 
@@ -25,8 +25,8 @@ void text_init(Manager manager, Text *text)
   int mw;
   size_t ml;
   TTF_MeasureString(font, text->text, 0, 0, &mw, &ml);
-  text->rect.w = (float)mw;
-  text->rect.h = (float)TTF_GetFontHeight(font);
+  text->base.rect.w = (float)mw;
+  text->base.rect.h = (float)TTF_GetFontHeight(font);
 
   TTF_SetFontSize(font, saved_size);
 }
@@ -36,7 +36,7 @@ void text_render(SDL_Renderer *renderer, Manager manager, Text *text)
   if (!text || !text->text)
     return;
 
-  TTF_Font *font = manager.get_managers()->font_manager->get(text->path ? text->path : "assets/fonts/MSYH.TTC"); // 默认微软雅黑
+  TTF_Font *font = manager.get_managers()->font_manager->get(text->path ? text->path : "MSYH.TTC"); // 默认微软雅黑
   if (!font)
     return;
 
@@ -57,7 +57,7 @@ void text_render(SDL_Renderer *renderer, Manager manager, Text *text)
     }
   }
   arrput(text_arr, *text);
-  SDL_RenderTexture(renderer, text->texture, NULL, &text->rect);
+  SDL_RenderTexture(renderer, text->texture, NULL, &text->base.rect);
   TTF_SetFontSize(font, saved_size);
 }
 

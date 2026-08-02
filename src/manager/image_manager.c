@@ -31,10 +31,12 @@ static void load(SDL_Renderer *renderer, const char *image_path)
   if (shget(image_map, image_path))
     return;
 
-  SDL_Texture *texture = IMG_LoadTexture(renderer, image_path);
+  char full[100];
+  SDL_snprintf(full, sizeof(full), "%s%s", IMAGE_BASE_PATH, image_path);
+  SDL_Texture *texture = IMG_LoadTexture(renderer, full);
   if (!texture)
   {
-    SDL_Log("Failed to load image '%s': %s", image_path, SDL_GetError());
+    SDL_Log("Failed to load image '%s': %s", full, SDL_GetError());
     return;
   }
   shput(image_map, image_path, texture);

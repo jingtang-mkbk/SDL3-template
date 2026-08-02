@@ -4,6 +4,8 @@
 #include <SDL3_image/SDL_image.h>
 #include "data.h"
 
+#define IMAGE_BASE_PATH "assets/imgs/"
+
 typedef struct ImageEntry
 {
   char *key;

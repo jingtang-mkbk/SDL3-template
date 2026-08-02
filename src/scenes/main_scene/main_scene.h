@@ -4,12 +4,13 @@
 #include "data.h"
 #include "ui/text.h"
 #include "ui/image.h"
+#include "render/render.h"
+#include "manager/manager.h"
 
 /* Scene-local data — only main_scene.c touches this */
 typedef struct MainSceneData
 {
-  Text switch_tex;
-  Image tiger_img;
+  Render_Element *arr;
 } MainSceneData;
 
 extern const Scene main_scene;

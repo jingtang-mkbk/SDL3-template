@@ -4,6 +4,8 @@
 #include <SDL3_mixer/SDL_mixer.h>
 #include "data.h"
 
+#define MUSIC_BASE_PATH "assets/music/"
+
 typedef struct MusicData
 {
   MIX_Audio *audio;

@@ -1,6 +1,12 @@
 #include "minesweeper_scene.h"
 #include "manager/manager.h"
 
+static void back_clicked(void *userdata)
+{
+  AppState *state = (AppState *)userdata;
+  state->switch_scene(state, "main_scene");
+}
+
 static void init(AppState *state)
 {
   MinesweeperSceneData *d = (MinesweeperSceneData *)SDL_calloc(1, sizeof(MinesweeperSceneData));
@@ -11,11 +17,15 @@ static void init(AppState *state)
 
   /* 初始化 Back 文字 */
   d->back_tex = (Text){
+      .base = (Element){
+          .rect = {5, 5, 0, 0},
+          .on_click = back_clicked,
+          .event_userdata = state,
+      },
       .text = "Back",
-      .path = "assets/fonts/MSYH.TTC",
+      .path = "MSYH.TTC",
       .font_size = 24.0f,
       .color = (SDL_Color){255, 255, 255, 255},
-      .rect = {5, 5, 0, 0},
   };
   text_init(manager, &d->back_tex);
 
@@ -55,10 +65,10 @@ static void init(AppState *state)
       }
       cJSON *bx = cJSON_GetObjectItem(comp, "x");
       if (cJSON_IsNumber(bx))
-        d->back_tex.rect.x = (float)bx->valuedouble;
+        d->back_tex.base.rect.x = (float)bx->valuedouble;
       cJSON *by = cJSON_GetObjectItem(comp, "y");
       if (cJSON_IsNumber(by))
-        d->back_tex.rect.y = (float)by->valuedouble;
+        d->back_tex.base.rect.y = (float)by->valuedouble;
     }
     else if (SDL_strcmp(type->valuestring, "RECT") == 0)
     {
@@ -133,13 +143,8 @@ static void event(AppState *state, SDL_Event *event)
     float mx = event->button.x, my = event->button.y;
 
     /* Back */
-    float bx = d->back_tex.rect.x, by = d->back_tex.rect.y;
-    float bw = d->back_tex.rect.w, bh = d->back_tex.rect.h;
-    if (mx >= bx && mx <= bx + bw && my >= by && my <= by + bh)
-    {
-      state->switch_scene(state, "main_scene");
+    if (element_handle_mouseevent(&d->back_tex.base, mx, my, ELEMENT_CLICK))
       return;
-    }
 
     /* 方块：直接用 JSON 的 x, y, w, h */
     int i = 0;

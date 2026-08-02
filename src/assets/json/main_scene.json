@@ -1,0 +1,30 @@
+{
+  "name": "TEST_SCENE",
+  "type": "SCENE",
+  "arr": [
+    {
+      "id": "1",
+      "type": "TEXT",
+      "text": "Switch",
+      "font_size": 48,
+      "color": "#FFFFFF",
+      "parent": null,
+      "children": null
+    },
+    {
+      "id": "2",
+      "type": "IMAGE",
+      "path": "gs_tiger.svg",
+      "base": {
+        "rect": {
+          "x": 100,
+          "y": 100,
+          "w": 200,
+          "h": 200
+        }
+      },
+      "parent": null,
+      "children": null
+    }
+  ]
+}

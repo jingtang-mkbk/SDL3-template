@@ -4,6 +4,8 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include "data.h"
 
+#define FONT_BASE_PATH "assets/fonts/"
+
 typedef struct FontEntry
 {
   char *key;

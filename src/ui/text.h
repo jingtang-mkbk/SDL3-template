@@ -2,16 +2,23 @@
 #define TEXT_H
 
 #include <SDL3_ttf/SDL_ttf.h>
-#include "data.h"
+#include "element.h"
 #include "manager/manager.h"
+
+typedef enum Text_Align
+{
+  Text_Align_Vertical_Center,
+  Text_Align_Hrizontal_Center,
+  Text_Align_Center,
+} Text_Align;
 
 typedef struct Text
 {
+  Element base;
   char *text;
   char *path;
   float font_size;
   SDL_Color color;
-  SDL_FRect rect;
   SDL_Texture *texture;
 } Text;
 

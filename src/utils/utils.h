@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "data.h"
 
-typedef struct
+typedef struct Color
 {
     Uint8 r, g, b;
 } Color;

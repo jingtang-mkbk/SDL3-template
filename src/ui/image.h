@@ -2,13 +2,13 @@
 #define IMAGE_H
 
 #include <SDL3_image/SDL_image.h>
-#include "data.h"
+#include "element.h"
 #include "manager/manager.h"
 
 typedef struct Image
 {
+  Element base;
   char *path;
-  SDL_FRect rect;
   SDL_Texture *texture;
 } Image;
 

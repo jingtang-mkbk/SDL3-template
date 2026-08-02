@@ -3,8 +3,10 @@
 static Image *img_arr = NULL;
 
 /*
- * img 必填字段: path, rect.x, rect.y
- * 从 image_manager 获取或加载纹理，计算 w, h
+ * img 必填字段, 从 image_manager 获取或加载纹理，计算 w, h
+ * @param path
+ * @param rect.x
+ * @param rect.y
  */
 void image_init(Manager manager, Image *img)
 {
@@ -18,8 +20,8 @@ void image_init(Manager manager, Image *img)
     return;
   }
 
-  if (img->rect.w == 0 && img->rect.h == 0)
-    SDL_GetTextureSize(tex, &img->rect.w, &img->rect.h);
+  if (img->base.rect.w == 0 && img->base.rect.h == 0)
+    SDL_GetTextureSize(tex, &img->base.rect.w, &img->base.rect.h);
   img->texture = tex;
 }
 
@@ -35,7 +37,7 @@ void image_render(SDL_Renderer *renderer, Image *img)
     return;
 
   arrput(img_arr, *img);
-  SDL_RenderTexture(renderer, img->texture, NULL, &img->rect);
+  SDL_RenderTexture(renderer, img->texture, NULL, &img->base.rect);
 }
 
 void image_render_multiple(SDL_Renderer *renderer, Image *imgs, int count)

@@ -48,10 +48,12 @@ static bool music_manager_load(const char *filepath)
     }
   }
 
-  MIX_Audio *audio = MIX_LoadAudio(mixer, filepath, false);
+  char full[100];
+  SDL_snprintf(full, sizeof(full), "%s%s", MUSIC_BASE_PATH, filepath);
+  MIX_Audio *audio = MIX_LoadAudio(mixer, full, false);
   if (!audio)
   {
-    SDL_Log("music_manager: failed to load '%s': %s", filepath, SDL_GetError());
+    SDL_Log("music_manager: failed to load '%s': %s", full, SDL_GetError());
     return false;
   }
 

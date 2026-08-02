@@ -41,4 +41,17 @@ typedef struct AppState
   void (*switch_scene)(AppState *, const char *);
 } AppState;
 
+/* id → 回调 映射表 */
+typedef struct
+{
+  void (*fn)(void *);
+  void *userdata;
+} ClickCB;
+typedef struct
+{
+  char *key;
+  ClickCB value;
+} ClickEntry;
+static ClickEntry *click_map = NULL;
+
 #endif // DATA_H

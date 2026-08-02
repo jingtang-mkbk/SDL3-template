@@ -43,7 +43,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     /* 初始化 manager 并加载字体（必须在场景 init 之前） */
     manager.init(MANAGER_FLAG_FONT | MANAGER_FLAG_IMAGE | MANAGER_FLAG_MUSIC);
-    manager.get_managers()->font_manager->load("assets/fonts/MSYH.TTC");
+    manager.get_managers()->font_manager->load("MSYH.TTC");
 
     /* Build scene hash map: string name → Scene* */
     state->scene_map = NULL;

@@ -42,10 +42,12 @@ static void load(const char *font_path)
   if (shget(font_map, font_path))
     return;
 
-  TTF_Font *font = TTF_OpenFont(font_path, 12);
+  char full[100];
+  SDL_snprintf(full, sizeof(full), "%s%s", FONT_BASE_PATH, font_path);
+  TTF_Font *font = TTF_OpenFont(full, 12);
   if (!font)
   {
-    SDL_Log("Failed to open font '%s': %s", font_path, SDL_GetError());
+    SDL_Log("Failed to open font '%s': %s", full, SDL_GetError());
     return;
   }
   shput(font_map, font_path, font);
