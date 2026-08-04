@@ -22,8 +22,6 @@ typedef struct MusicManager
 {
   bool (*init)(void);
   void (*deinit)(void);
-  bool (*load)(const char *filepath);
-  void (*load_multiple)(const char **filepaths, int count);
   void (*play)(const char *filepath);
   void (*pause)(const char *filepath);
 } MusicManager;

@@ -16,9 +16,7 @@ typedef struct ImageManager
 {
   void (*init)(void);
   void (*deinit)(void);
-  void (*load)(SDL_Renderer *renderer, const char *image_path);
-  void (*load_multiple)(SDL_Renderer *renderer, const char **image_paths, int count);
-  SDL_Texture *(*get)(const char *image_path);
+  SDL_Texture *(*get)(SDL_Renderer *renderer, const char *image_path);
 } ImageManager;
 
 extern const ImageManager image_manager;

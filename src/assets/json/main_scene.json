@@ -1,18 +1,37 @@
 {
   "name": "TEST_SCENE",
   "type": "SCENE",
-  "arr": [
+  "components": [
     {
       "id": "1",
       "type": "TEXT",
-      "text": "Switch",
+      "text": "Mine Sweeper",
       "font_size": 48,
       "color": "#FFFFFF",
+      "base": {
+        "rect": {
+          "y": 0
+        }
+      },
       "parent": null,
       "children": null
     },
     {
       "id": "2",
+      "type": "TEXT",
+      "text": "Test",
+      "font_size": 48,
+      "color": "#FFFFFF",
+      "base": {
+        "rect": {
+          "y": 60
+        }
+      },
+      "parent": null,
+      "children": null
+    },
+    {
+      "id": "3",
       "type": "IMAGE",
       "path": "gs_tiger.svg",
       "base": {

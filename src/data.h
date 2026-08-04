@@ -44,7 +44,7 @@ typedef struct AppState
 /* id → 回调 映射表 */
 typedef struct
 {
-  void (*fn)(void *);
+  void (*fn)(SDL_Event *, void *);
   void *userdata;
 } ClickCB;
 typedef struct

@@ -16,8 +16,6 @@ typedef struct FontManager
 {
   bool (*init)(void);
   void (*deinit)(void);
-  void (*load)(const char *font_path);
-  void (*load_multiple)(const char **font_paths, int count);
   TTF_Font *(*get)(const char *font_path);
 } FontManager;
 

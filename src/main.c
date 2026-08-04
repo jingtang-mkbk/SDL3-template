@@ -34,16 +34,14 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     getWithHeightFromPlatform(&width, &height);
 
     /* Create the window */
-    if (!SDL_CreateWindowAndRenderer("Hello World", width, height, flag, &state->window, &state->renderer))
+    if (!SDL_CreateWindowAndRenderer("SDL3-Template", width, height, flag, &state->window, &state->renderer))
     {
         SDL_Log("Couldn't create window and renderer: %s", SDL_GetError());
         SDL_free(state);
         return SDL_APP_FAILURE;
     }
 
-    /* 初始化 manager 并加载字体（必须在场景 init 之前） */
     manager.init(MANAGER_FLAG_FONT | MANAGER_FLAG_IMAGE | MANAGER_FLAG_MUSIC);
-    manager.get_managers()->font_manager->load("MSYH.TTC");
 
     /* Build scene hash map: string name → Scene* */
     state->scene_map = NULL;

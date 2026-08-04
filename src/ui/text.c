@@ -9,7 +9,7 @@ static Text *text_arr = NULL;
  * @param font_size
  * @param color
  */
-void text_init(Manager manager, Text *text)
+void text_init(Text *text)
 {
   if (!text || !text->text)
     return;
@@ -25,13 +25,55 @@ void text_init(Manager manager, Text *text)
   int mw;
   size_t ml;
   TTF_MeasureString(font, text->text, 0, 0, &mw, &ml);
+
+  SDL_FRect rect = text->base.rect;
+  switch (text->textalign)
+  {
+  case TextAlign_TopCenter:
+    text->base.rect.x = rect.x + (rect.w - mw) / 2.0f;
+    break;
+  case TextAlign_TopRight:
+    text->base.rect.x = rect.x + rect.w - mw;
+    break;
+  case TextAlign_CenterLeft:
+    text->base.rect.y = rect.y + (rect.h - TTF_GetFontHeight(font)) / 2.0f;
+    break;
+  case TextAlign_Center:
+    if (rect.w == 0 || rect.h == 0)
+    {
+      SDL_Log("请初始化宽高");
+      break;
+    }
+    text->base.rect.x = rect.x + (rect.w - mw) / 2.0f;
+    text->base.rect.y = rect.y + (rect.h - TTF_GetFontHeight(font)) / 2.0f;
+    break;
+  case TextAlign_CenterRight:
+    text->base.rect.x = rect.x + rect.w - mw;
+    text->base.rect.y = rect.y + (rect.h - TTF_GetFontHeight(font)) / 2.0f;
+    break;
+  case TextAlign_BottomLeft:
+    text->base.rect.y = rect.y + rect.h - TTF_GetFontHeight(font);
+    break;
+  case TextAlign_BottomCenter:
+    text->base.rect.x = rect.x + (rect.w - mw) / 2.0f;
+    text->base.rect.y = rect.y + rect.h - TTF_GetFontHeight(font);
+    break;
+  case TextAlign_BottomRight:
+    text->base.rect.x = rect.x + rect.w - mw;
+    text->base.rect.y = rect.y + rect.h - TTF_GetFontHeight(font);
+    break;
+  case TextAlign_TopLeft:
+  case TextAlign_None:
+  default:
+    break;
+  }
   text->base.rect.w = (float)mw;
   text->base.rect.h = (float)TTF_GetFontHeight(font);
 
   TTF_SetFontSize(font, saved_size);
 }
 
-void text_render(SDL_Renderer *renderer, Manager manager, Text *text)
+void text_render(SDL_Renderer *renderer, Text *text)
 {
   if (!text || !text->text)
     return;
@@ -52,11 +94,11 @@ void text_render(SDL_Renderer *renderer, Manager manager, Text *text)
     if (surf)
     {
       text->texture = SDL_CreateTextureFromSurface(renderer, surf);
-
+      /* 只在创建纹理时记录一次，避免 text_arr 无限增长和重复释放 */
+      arrput(text_arr, *text);
       SDL_DestroySurface(surf);
     }
   }
-  arrput(text_arr, *text);
   SDL_RenderTexture(renderer, text->texture, NULL, &text->base.rect);
   TTF_SetFontSize(font, saved_size);
 }
@@ -68,16 +110,16 @@ void text_render(SDL_Renderer *renderer, Manager manager, Text *text)
  * @param font_size
  * @param color
  */
-void text_init_multiple(Manager manager, Text *texts, int count)
+void text_init_multiple(Text *texts, int count)
 {
   for (int i = 0; i < count; i++)
-    text_init(manager, &texts[i]);
+    text_init(&texts[i]);
 }
 
-void text_render_multiple(SDL_Renderer *renderer, Manager manager, Text *texts, int count)
+void text_render_multiple(SDL_Renderer *renderer, Text *texts, int count)
 {
   for (int i = 0; i < count; i++)
-    text_render(renderer, manager, &texts[i]);
+    text_render(renderer, &texts[i]);
 }
 
 void text_deinit()

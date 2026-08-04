@@ -8,12 +8,12 @@ static Image *img_arr = NULL;
  * @param rect.x
  * @param rect.y
  */
-void image_init(Manager manager, Image *img)
+void image_init(SDL_Renderer *renderer, Manager manager, Image *img)
 {
   if (!img || !img->path)
     return;
 
-  SDL_Texture *tex = manager.get_managers()->image_manager->get(img->path);
+  SDL_Texture *tex = manager.get_managers()->image_manager->get(renderer, img->path);
   if (!tex)
   {
     SDL_Log("image_init: image '%s' not loaded", img->path);
@@ -25,10 +25,10 @@ void image_init(Manager manager, Image *img)
   img->texture = tex;
 }
 
-void image_init_multiple(Manager manager, Image *imgs, int count)
+void image_init_multiple(SDL_Renderer *renderer, Manager manager, Image *imgs, int count)
 {
   for (int i = 0; i < count; i++)
-    image_init(manager, &imgs[i]);
+    image_init(renderer, manager, &imgs[i]);
 }
 
 void image_render(SDL_Renderer *renderer, Image *img)

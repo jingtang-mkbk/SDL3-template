@@ -2,30 +2,39 @@
 #define TEXT_H
 
 #include <SDL3_ttf/SDL_ttf.h>
-#include "element.h"
+#include "event/event.h"
 #include "manager/manager.h"
 
-typedef enum Text_Align
+// clang-format off
+typedef enum TextAlign
 {
-  Text_Align_Vertical_Center,
-  Text_Align_Hrizontal_Center,
-  Text_Align_Center,
-} Text_Align;
-
+  TextAlign_None,         /* w h不需要定义                                  TopCenter                       */ 
+  TextAlign_TopLeft,      /*                                TopLeft ┌──────────────────────┐ TopRight       */
+  TextAlign_TopCenter,    /*                                        |                      |                */
+  TextAlign_TopRight,     /*                                        |                      |                */
+  TextAlign_CenterLeft,   /*                                        |                      |                */
+  TextAlign_Center,       /*                             CenterLeft |        Center        | CenterRight    */
+  TextAlign_CenterRight,  /*                                        |                      |                */
+  TextAlign_BottomLeft,   /*                                        |                      |                */
+  TextAlign_BottomCenter, /*                                        |                      |                */
+  TextAlign_BottomRight,  /*                             BottomLeft └──────────────────────┘ BottomRight    */ 
+} TextAlign;              /*                                               BottomCenter                       */
+// clang-format on
 typedef struct Text
 {
-  Element base;
+  Event base;
   char *text;
   char *path;
   float font_size;
   SDL_Color color;
   SDL_Texture *texture;
+  TextAlign textalign;
 } Text;
 
-void text_init(Manager manager, Text *text);
-void text_init_multiple(Manager manager, Text *texts, int count);
-void text_render(SDL_Renderer *renderer, Manager manager, Text *text);
-void text_render_multiple(SDL_Renderer *renderer, Manager manager, Text *texts, int count);
+void text_init(Text *text);
+void text_init_multiple(Text *texts, int count);
+void text_render(SDL_Renderer *renderer, Text *text);
+void text_render_multiple(SDL_Renderer *renderer, Text *texts, int count);
 void text_deinit(void);
 
 #endif /* TEXT_H */

@@ -1,12 +1,17 @@
 #include "main_scene.h"
 
-static void switch_clicked(void *userdata)
+static void switch_clicked(SDL_Event *event, void *userdata)
 {
   AppState *state = (AppState *)userdata;
   state->switch_scene(state, "minesweeper_scene");
 }
 
-static void tiger_clicked(void *userdata)
+static void test_clicked(SDL_Event *event, void *userdata)
+{
+  SDL_Log("Test clicked\n");
+}
+
+static void tiger_clicked(SDL_Event *event, void *userdata)
 {
   SDL_Log("Tiger clicked!\n");
 }
@@ -18,7 +23,8 @@ static void init(AppState *state)
 
   /* 注册回调（id 只写一次） */
   shput(click_map, "1", ((ClickCB){switch_clicked, state}));
-  shput(click_map, "2", ((ClickCB){tiger_clicked, state}));
+  shput(click_map, "2", ((ClickCB){test_clicked, state}));
+  shput(click_map, "3", ((ClickCB){tiger_clicked, state}));
 
   /* 从 JSON 解析元素 */
   d->arr = render_json2element("assets/json/main_scene.json");
@@ -35,19 +41,21 @@ static void init(AppState *state)
       render_set_callback(d->arr, d->arr[i].id, cb.fn, cb.userdata);
   }
 
-  /* Switch 居中 */
-  Render_Element *sw = render_find_by_id(d->arr, "1");
-  if (sw)
+  /* 居中 */
+  int pw, ph;
+  SDL_GetCurrentRenderOutputSize(state->renderer, &pw, &ph);
+  const char *center_ids[] = {"1", "2"};
+  for (int i = 0; i < 2; i++)
   {
-    Element *base = (Element *)sw->element;
-    int pw, ph;
-    SDL_GetCurrentRenderOutputSize(state->renderer, &pw, &ph);
-    base->rect.x = (pw - base->rect.w) / 2.0f;
-    base->rect.y = (ph - base->rect.h) / 2.0f;
+    Render_Element *el = render_find_by_id(d->arr, center_ids[i]);
+    if (el)
+    {
+      Event *base = (Event *)el->element;
+      base->rect.x = (pw - base->rect.w) / 2.0f;
+    }
   }
 
-  /* Start background music */
-  manager.get_managers()->music_manager->load("the_entertainer.ogg");
+  /* Start background music（play 未加载时会自动 load） */
   manager.get_managers()->music_manager->play("the_entertainer.ogg");
 }
 
@@ -61,15 +69,8 @@ static void event(AppState *state, SDL_Event *event)
     return;
   }
 
-  if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN)
-  {
-    SDL_ConvertEventToRenderCoordinates(state->renderer, event);
-    float mx = event->button.x;
-    float my = event->button.y;
-
-    for (int i = 0; i < arrlen(d->arr); i++)
-      element_handle_mouseevent(d->arr[i].element, mx, my, ELEMENT_CLICK);
-  }
+  for (int i = 0; i < arrlen(d->arr); i++)
+    mouseevent_handle(state->renderer, event, d->arr[i].element, EVENT_CLICK);
 }
 
 static void iterate(AppState *state)
@@ -85,10 +86,7 @@ static void iterate(AppState *state)
 static void deinit(AppState *state)
 {
   MainSceneData *d = SCENE_DATA(state, MainSceneData);
-  manager.get_managers()->music_manager->pause("the_entertainer.ogg");
-  for (int i = 0; i < arrlen(d->arr); i++)
-    SDL_free(d->arr[i].element);
-  render_deinit();
+  render_deinit(d->arr);
   shfree(click_map);
   click_map = NULL;
   SDL_free(state->scene_data);

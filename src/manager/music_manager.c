@@ -33,9 +33,9 @@ static bool music_manager_load(const char *filepath)
   if (!filepath)
     return false;
 
-  /* 已加载则跳过 */
-  MusicEntry *exist = music_map ? shgetp(music_map, filepath) : NULL;
-  if (exist)
+  /* 已加载则跳过（shgetp 未找到时返回零值默认槽，须判断 track 是否真实存在） */
+  MusicEntry *exist = shgetp(music_map, filepath);
+  if (exist && exist->value.track)
     return true;
 
   if (!mixer)
@@ -78,19 +78,20 @@ static bool music_manager_load(const char *filepath)
   return true;
 }
 
-static void music_manager_load_multiple(const char **filepaths, int count)
-{
-  for (int i = 0; i < count; i++)
-    music_manager_load(filepaths[i]);
-}
-
 static void music_manager_play(const char *filepath)
 {
   if (!filepath)
     return;
   MusicEntry *e = shgetp(music_map, filepath);
   if (!e || !e->value.track)
-    return;
+  {
+    /* 未加载则先加载，再播放 */
+    if (!music_manager_load(filepath))
+      return;
+    e = shgetp(music_map, filepath);
+    if (!e || !e->value.track)
+      return;
+  }
 
   SDL_PropertiesID props = SDL_CreateProperties();
   SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, -1);
@@ -111,8 +112,6 @@ static void music_manager_pause(const char *filepath)
 const MusicManager music_manager = {
     .init = music_manager_init,
     .deinit = music_manager_deinit,
-    .load = music_manager_load,
-    .load_multiple = music_manager_load_multiple,
     .play = music_manager_play,
     .pause = music_manager_pause,
 };

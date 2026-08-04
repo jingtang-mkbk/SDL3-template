@@ -53,23 +53,22 @@ static void load(const char *font_path)
   shput(font_map, font_path, font);
 }
 
-static void load_multiple(const char **font_paths, int count)
-{
-  for (int i = 0; i < count; i++)
-    load(font_paths[i]);
-}
-
 static TTF_Font *get(const char *font_path)
 {
   if (font_path == NULL)
     return NULL;
-  return shget(font_map, font_path);
+  TTF_Font *font = shget(font_map, font_path);
+  if (!font)
+  {
+    /* 未加载则先加载，再取 */
+    load(font_path);
+    font = shget(font_map, font_path);
+  }
+  return font;
 }
 
 const FontManager font_manager = {
     .init = init,
     .deinit = deinit,
-    .load = load,
-    .load_multiple = load_multiple,
     .get = get,
 };
