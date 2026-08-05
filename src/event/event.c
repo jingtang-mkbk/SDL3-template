@@ -1,6 +1,17 @@
 #include "event.h"
 #include "utils/utils.h"
 
+typedef struct Event_internal
+{
+  SDL_FRect rect;
+  void (*on_click)(SDL_Event *event, void *userdata);
+  void (*on_click_right)(SDL_Event *event, void *userdata);
+  void (*on_mouseenter)(SDL_Event *event, void *userdata);
+  void (*on_mouseleave)(SDL_Event *event, void *userdata);
+  void *event_userdata;
+  bool in_rect;
+} Event_internal;
+
 static void mouseevent_click(SDL_Renderer *renderer, SDL_Event *event, Event *base)
 {
   if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && event->button.button == SDL_BUTTON_LEFT)
@@ -31,11 +42,12 @@ static void mouseevent_rclick(SDL_Renderer *renderer, SDL_Event *event, Event *b
   }
 }
 
-static void mouseevent_motion(SDL_Renderer *renderer, SDL_Event *event, Event *base, const Uint8 event_flags)
+static void mouseevent_motion(SDL_Renderer *renderer, SDL_Event *event, Event *_base, const Uint8 event_flags)
 {
-  if (!base || event->type != SDL_EVENT_MOUSE_MOTION)
+  if (!_base || event->type != SDL_EVENT_MOUSE_MOTION)
     return;
 
+  Event_internal *base = (Event_internal *)_base;
   SDL_ConvertEventToRenderCoordinates(renderer, event);
   float mx = event->button.x;
   float my = event->button.y;
@@ -60,4 +72,9 @@ void mouseevent_handle(SDL_Renderer *renderer, SDL_Event *event, Event *base, co
     mouseevent_rclick(renderer, event, base);
   if ((event_flags & (EVENT_HOVER | EVENT_LEAVE)) && (base->on_mouseenter || base->on_mouseleave))
     mouseevent_motion(renderer, event, base, event_flags);
+}
+
+Event *event_create(void)
+{
+  return (Event *)SDL_calloc(1, sizeof(Event_internal));
 }

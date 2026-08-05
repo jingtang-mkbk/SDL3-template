@@ -4,6 +4,7 @@
 #include <SDL3/SDL.h>
 #include "stb_ds.h"
 
+#define DEFAULT_FONT "MSYH.TTC"
 /* ---- Convenience macro ---- */
 #define SCENE_DATA(state, Type) ((Type *)(state)->scene_data)
 

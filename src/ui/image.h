@@ -5,17 +5,15 @@
 #include "event/event.h"
 #include "manager/manager.h"
 
-typedef struct Image
+typedef struct UI_Image
 {
   Event base;
   char *path;
-  SDL_Texture *texture;
-} Image;
+} UI_Image;
 
-void image_init(SDL_Renderer *renderer, Manager manager, Image *img);
-void image_init_multiple(SDL_Renderer *renderer, Manager manager, Image *imgs, int count);
-void image_render(SDL_Renderer *renderer, Image *img);
-void image_render_multiple(SDL_Renderer *renderer, Image *imgs, int count);
-void image_deinit(void);
+void UI_image_init(SDL_Renderer *renderer, Manager manager, UI_Image *img);
+void UI_image_render(SDL_Renderer *renderer, UI_Image *img);
+void UI_image_deinit(void);
+UI_Image *UI_image_create(void);
 
 #endif // IMAGE_H

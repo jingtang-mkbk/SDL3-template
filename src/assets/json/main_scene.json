@@ -8,11 +8,7 @@
       "text": "Mine Sweeper",
       "font_size": 48,
       "color": "#FFFFFF",
-      "base": {
-        "rect": {
-          "y": 0
-        }
-      },
+      "y": 0,
       "parent": null,
       "children": null
     },
@@ -22,11 +18,7 @@
       "text": "Test",
       "font_size": 48,
       "color": "#FFFFFF",
-      "base": {
-        "rect": {
-          "y": 60
-        }
-      },
+      "y": 60,
       "parent": null,
       "children": null
     },
@@ -34,14 +26,10 @@
       "id": "3",
       "type": "IMAGE",
       "path": "gs_tiger.svg",
-      "base": {
-        "rect": {
-          "x": 100,
-          "y": 100,
-          "w": 200,
-          "h": 200
-        }
-      },
+      "x": 100,
+      "y": 100,
+      "w": 200,
+      "h": 200,
       "parent": null,
       "children": null
     }

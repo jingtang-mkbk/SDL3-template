@@ -6,12 +6,6 @@
 
 #define FONT_BASE_PATH "assets/fonts/"
 
-typedef struct FontEntry
-{
-  char *key;
-  TTF_Font *value;
-} FontEntry;
-
 typedef struct FontManager
 {
   bool (*init)(void);

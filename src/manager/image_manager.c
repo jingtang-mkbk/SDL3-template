@@ -1,5 +1,11 @@
 #include "image_manager.h"
 
+typedef struct ImageEntry
+{
+  char *key;
+  SDL_Texture *value;
+} ImageEntry;
+
 static ImageEntry *image_map = NULL; /* string → SDL_Texture* hash table */
 
 static ImageEntry *get_image_map()

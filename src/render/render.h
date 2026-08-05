@@ -25,13 +25,6 @@ typedef struct Render_Element
   Render_Element *parent;
 } Render_Element;
 
-void render_init(SDL_Renderer *renderer, Render_Element *arr);
-void render(SDL_Renderer *renderer, Render_Element *arr);
-void render_deinit(Render_Element *arr);
-Render_Element *render_json2element(const char *filepath);
-Render_Element *render_find_by_id(Render_Element *arr, const char *id);
-void render_set_callback(Render_Element *arr, const char *id, void (*on_click)(SDL_Event *, void *), void *userdata);
-
 typedef struct CallbackBinding
 {
   const char *id;
@@ -39,6 +32,12 @@ typedef struct CallbackBinding
   void *userdata;
 } CallbackBinding;
 
-void render_set_callbacks(Render_Element *arr, const CallbackBinding *bindings, int count);
+void Render_init(SDL_Renderer *renderer, Render_Element *arr);
+void Render_render(SDL_Renderer *renderer, Render_Element *arr);
+void Render_deinit(Render_Element *arr);
+Render_Element *Render_json2element(const char *filepath);
+Render_Element *Render_find_by_id(Render_Element *arr, const char *id);
+void Render_set_callback(Render_Element *arr, const char *id, void (*on_click)(SDL_Event *, void *), void *userdata);
+void Render_set_callbacks(Render_Element *arr, const CallbackBinding *bindings, int count);
 
 #endif

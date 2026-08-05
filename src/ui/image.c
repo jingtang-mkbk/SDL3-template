@@ -1,6 +1,19 @@
 #include "image.h"
 
-static Image *img_arr = NULL;
+typedef struct UI_Image_internal
+{
+  Event base;
+  char *path;
+  SDL_Texture *texture;
+} UI_Image_internal;
+
+static UI_Image_internal *img_arr = NULL;
+
+/* 按完整内部结构体分配，返回公开基类指针 */
+UI_Image *UI_image_create(void)
+{
+  return (UI_Image *)SDL_calloc(1, sizeof(UI_Image_internal));
+}
 
 /*
  * img 必填字段, 从 image_manager 获取或加载纹理，计算 w, h
@@ -8,15 +21,16 @@ static Image *img_arr = NULL;
  * @param rect.x
  * @param rect.y
  */
-void image_init(SDL_Renderer *renderer, Manager manager, Image *img)
+void UI_image_init(SDL_Renderer *renderer, Manager manager, UI_Image *_img)
 {
-  if (!img || !img->path)
+  if (!_img || !_img->path)
     return;
+  UI_Image_internal *img = (UI_Image_internal *)_img;
 
   SDL_Texture *tex = manager.get_managers()->image_manager->get(renderer, img->path);
   if (!tex)
   {
-    SDL_Log("image_init: image '%s' not loaded", img->path);
+    SDL_Log("UI_image_init: image '%s' not loaded", img->path);
     return;
   }
 
@@ -25,28 +39,19 @@ void image_init(SDL_Renderer *renderer, Manager manager, Image *img)
   img->texture = tex;
 }
 
-void image_init_multiple(SDL_Renderer *renderer, Manager manager, Image *imgs, int count)
+void UI_image_render(SDL_Renderer *renderer, UI_Image *_img)
 {
-  for (int i = 0; i < count; i++)
-    image_init(renderer, manager, &imgs[i]);
-}
-
-void image_render(SDL_Renderer *renderer, Image *img)
-{
-  if (!img || !img->texture)
+  if (!_img)
+    return;
+  UI_Image_internal *img = (UI_Image_internal *)_img;
+  if (!img->texture)
     return;
 
   arrput(img_arr, *img);
   SDL_RenderTexture(renderer, img->texture, NULL, &img->base.rect);
 }
 
-void image_render_multiple(SDL_Renderer *renderer, Image *imgs, int count)
-{
-  for (int i = 0; i < count; i++)
-    image_render(renderer, &imgs[i]);
-}
-
-void image_deinit()
+void UI_image_deinit()
 {
   arrfree(img_arr);
   img_arr = NULL;

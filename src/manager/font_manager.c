@@ -1,5 +1,11 @@
 #include "font_manager.h"
 
+typedef struct FontEntry
+{
+  char *key;
+  TTF_Font *value;
+} FontEntry;
+
 static FontEntry *font_map = NULL; /* string → TTF_Font* hash table */
 
 static FontEntry *get_font_map()

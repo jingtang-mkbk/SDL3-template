@@ -6,7 +6,7 @@
 #include "manager/manager.h"
 
 // clang-format off
-typedef enum TextAlign
+typedef enum UI_TextAlign
 {
   TextAlign_None,         /* w h不需要定义                                  TopCenter                       */ 
   TextAlign_TopLeft,      /*                                TopLeft ┌──────────────────────┐ TopRight       */
@@ -18,23 +18,21 @@ typedef enum TextAlign
   TextAlign_BottomLeft,   /*                                        |                      |                */
   TextAlign_BottomCenter, /*                                        |                      |                */
   TextAlign_BottomRight,  /*                             BottomLeft └──────────────────────┘ BottomRight    */ 
-} TextAlign;              /*                                               BottomCenter                       */
+} UI_TextAlign;              /*                                               BottomCenter                       */
 // clang-format on
-typedef struct Text
+typedef struct UI_Text
 {
   Event base;
   char *text;
   char *path;
   float font_size;
   SDL_Color color;
-  SDL_Texture *texture;
-  TextAlign textalign;
-} Text;
+  UI_TextAlign textalign;
+} UI_Text;
 
-void text_init(Text *text);
-void text_init_multiple(Text *texts, int count);
-void text_render(SDL_Renderer *renderer, Text *text);
-void text_render_multiple(SDL_Renderer *renderer, Text *texts, int count);
-void text_deinit(void);
+void UI_text_init(UI_Text *text);
+void UI_text_render(SDL_Renderer *renderer, UI_Text *text);
+void UI_text_deinit(void);
+UI_Text *UI_text_create(void);
 
 #endif /* TEXT_H */

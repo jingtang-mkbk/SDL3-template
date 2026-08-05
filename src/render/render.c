@@ -1,7 +1,7 @@
 #include "render.h"
 #include "utils/utils.h"
 
-Render_Element *render_find_by_id(Render_Element *arr, const char *id)
+Render_Element *Render_find_by_id(Render_Element *arr, const char *id)
 {
   for (int i = 0; i < arrlen(arr); i++)
   {
@@ -9,7 +9,7 @@ Render_Element *render_find_by_id(Render_Element *arr, const char *id)
       return &arr[i];
     if (arr[i].children)
     {
-      Render_Element *found = render_find_by_id(arr[i].children, id);
+      Render_Element *found = Render_find_by_id(arr[i].children, id);
       if (found)
         return found;
     }
@@ -17,9 +17,9 @@ Render_Element *render_find_by_id(Render_Element *arr, const char *id)
   return NULL;
 }
 
-void render_set_callback(Render_Element *arr, const char *id, void (*on_click)(SDL_Event *, void *), void *userdata)
+void Render_set_callback(Render_Element *arr, const char *id, void (*on_click)(SDL_Event *, void *), void *userdata)
 {
-  Render_Element *el = render_find_by_id(arr, id);
+  Render_Element *el = Render_find_by_id(arr, id);
   if (!el || !el->element)
     return;
   Event *base = (Event *)el->element;
@@ -27,13 +27,13 @@ void render_set_callback(Render_Element *arr, const char *id, void (*on_click)(S
   base->event_userdata = userdata;
 }
 
-void render_set_callbacks(Render_Element *arr, const CallbackBinding *bindings, int count)
+void Render_set_callbacks(Render_Element *arr, const CallbackBinding *bindings, int count)
 {
   for (int i = 0; i < count; i++)
-    render_set_callback(arr, bindings[i].id, bindings[i].on_click, bindings[i].userdata);
+    Render_set_callback(arr, bindings[i].id, bindings[i].on_click, bindings[i].userdata);
 }
 
-Render_Element *render_json2element(const char *filepath)
+Render_Element *Render_json2element(const char *filepath)
 {
   Render_Element *arr = NULL;
   SDL_IOStream *io = SDL_IOFromFile(filepath, "r");
@@ -76,26 +76,24 @@ Render_Element *render_json2element(const char *filepath)
     if (SDL_strcmp(type_json->valuestring, "TEXT") == 0)
     {
       re.type = Render_Type_Text;
-      Text *text = SDL_calloc(1, sizeof(Text));
+      UI_Text *text = UI_text_create();
       cJSON *t = cJSON_GetObjectItem(comp, "text");
       if (cJSON_IsString(t))
         text->text = SDL_strdup(t->valuestring);
       cJSON *fs = cJSON_GetObjectItem(comp, "font_size");
       if (cJSON_IsNumber(fs))
         text->font_size = (float)fs->valuedouble;
-      text->path = "MSYH.TTC";
       cJSON *color = cJSON_GetObjectItem(comp, "color");
       if (cJSON_IsString(color))
       {
-        SDL_Color c = parse_color(color->valuestring);
-        text->color = (SDL_Color){c.r, c.g, c.b, c.a};
+        text->color = parse_color(color->valuestring);
       }
       re.element = text;
     }
     else if (SDL_strcmp(type_json->valuestring, "IMAGE") == 0)
     {
       re.type = Render_Type_Image;
-      Image *img = SDL_calloc(1, sizeof(Image));
+      UI_Image *img = UI_image_create();
       cJSON *p = cJSON_GetObjectItem(comp, "path");
       if (cJSON_IsString(p))
         img->path = SDL_strdup(p->valuestring);
@@ -106,12 +104,10 @@ Render_Element *render_json2element(const char *filepath)
     {
       Event *base = (Event *)re.element;
       /* 先尝试 base.rect 嵌套格式 */
-      cJSON *base_json = cJSON_GetObjectItem(comp, "base");
-      cJSON *rect_json = base_json ? cJSON_GetObjectItem(base_json, "rect") : NULL;
-      cJSON *x = rect_json ? cJSON_GetObjectItem(rect_json, "x") : cJSON_GetObjectItem(comp, "x");
-      cJSON *y = rect_json ? cJSON_GetObjectItem(rect_json, "y") : cJSON_GetObjectItem(comp, "y");
-      cJSON *w = rect_json ? cJSON_GetObjectItem(rect_json, "w") : cJSON_GetObjectItem(comp, "w");
-      cJSON *h = rect_json ? cJSON_GetObjectItem(rect_json, "h") : cJSON_GetObjectItem(comp, "h");
+      cJSON *x = cJSON_GetObjectItem(comp, "x");
+      cJSON *y = cJSON_GetObjectItem(comp, "y");
+      cJSON *w = cJSON_GetObjectItem(comp, "w");
+      cJSON *h = cJSON_GetObjectItem(comp, "h");
       base->rect.x = cJSON_IsNumber(x) ? (float)x->valuedouble : 0;
       base->rect.y = cJSON_IsNumber(y) ? (float)y->valuedouble : 0;
       base->rect.w = cJSON_IsNumber(w) ? (float)w->valuedouble : 0;
@@ -126,42 +122,42 @@ Render_Element *render_json2element(const char *filepath)
   return arr;
 }
 
-void render_init(SDL_Renderer *renderer, Render_Element *arr)
+void Render_init(SDL_Renderer *renderer, Render_Element *arr)
 {
   for (int i = 0; i < arrlen(arr); i++)
   {
     switch (arr[i].type)
     {
     case Render_Type_Text:
-      text_init((Text *)arr[i].element);
+      UI_text_init((UI_Text *)arr[i].element);
       break;
     case Render_Type_Image:
-      image_init(renderer, manager, (Image *)arr[i].element);
+      UI_image_init(renderer, manager, (UI_Image *)arr[i].element);
       break;
     }
 
     if (arr[i].children)
-      render_init(renderer, arr[i].children);
+      Render_init(renderer, arr[i].children);
   }
 }
 
-void render(SDL_Renderer *renderer, Render_Element *arr)
+void Render_render(SDL_Renderer *renderer, Render_Element *arr)
 {
   for (int i = 0; i < arrlen(arr); i++)
   {
     switch (arr[i].type)
     {
     case Render_Type_Text:
-      Text *text = (Text *)arr[i].element;
-      text_render(renderer, text);
+      UI_Text *text = (UI_Text *)arr[i].element;
+      UI_text_render(renderer, text);
       if (arr[i].children)
-        render(renderer, arr[i].children);
+        Render_render(renderer, arr[i].children);
       break;
     case Render_Type_Image:
-      Image *img = (Image *)arr[i].element;
-      image_render(renderer, img);
+      UI_Image *img = (UI_Image *)arr[i].element;
+      UI_image_render(renderer, img);
       if (arr[i].children)
-        render(renderer, arr[i].children);
+        Render_render(renderer, arr[i].children);
       break;
     case Render_Type_Button:
       break;
@@ -171,7 +167,7 @@ void render(SDL_Renderer *renderer, Render_Element *arr)
   }
 }
 
-void render_deinit(Render_Element *arr)
+void Render_deinit(Render_Element *arr)
 {
   if (!arr)
     return;
@@ -180,24 +176,20 @@ void render_deinit(Render_Element *arr)
   {
     SDL_free(arr[i].id); /* SDL_strdup 分配的 id */
     if (arr[i].children)
-      render_deinit(arr[i].children);
+      Render_deinit(arr[i].children);
 
     switch (arr[i].type)
     {
     case Render_Type_Text:
-    {
-      Text *text = (Text *)arr[i].element;
+      UI_Text *text = (UI_Text *)arr[i].element;
       SDL_free(text->text); /* SDL_strdup 分配的文本 */
       SDL_free(text);
       break;
-    }
     case Render_Type_Image:
-    {
-      Image *img = (Image *)arr[i].element;
+      UI_Image *img = (UI_Image *)arr[i].element;
       SDL_free(img->path); /* SDL_strdup 分配的路径 */
       SDL_free(img);
       break;
-    }
     default:
       SDL_free(arr[i].element);
       break;
@@ -206,6 +198,6 @@ void render_deinit(Render_Element *arr)
 
   arrfree(arr);
 
-  image_deinit();
-  text_deinit();
+  UI_image_deinit();
+  UI_text_deinit();
 }

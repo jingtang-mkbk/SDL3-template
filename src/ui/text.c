@@ -1,6 +1,22 @@
 #include "text.h"
 
-static Text *text_arr = NULL;
+typedef struct UI_Text_internal
+{
+  Event base;
+  char *text;
+  char *path;
+  float font_size;
+  SDL_Color color;
+  UI_TextAlign textalign;
+  SDL_Texture *texture;
+} UI_Text_internal;
+
+static UI_Text_internal *text_arr = NULL;
+
+UI_Text *UI_text_create(void)
+{
+  return (UI_Text *)SDL_calloc(1, sizeof(UI_Text_internal));
+}
 
 /*
  * text 必填字段, 计算w、h
@@ -9,12 +25,13 @@ static Text *text_arr = NULL;
  * @param font_size
  * @param color
  */
-void text_init(Text *text)
+void UI_text_init(UI_Text *_text)
 {
-  if (!text || !text->text)
+  if (!_text || !_text->text)
     return;
 
-  TTF_Font *font = manager.get_managers()->font_manager->get(text->path ? text->path : "MSYH.TTC");
+  UI_Text_internal *text = (UI_Text_internal *)_text;
+  TTF_Font *font = manager.get_managers()->font_manager->get(text->path ? text->path : DEFAULT_FONT);
   if (!font)
     return;
 
@@ -73,12 +90,13 @@ void text_init(Text *text)
   TTF_SetFontSize(font, saved_size);
 }
 
-void text_render(SDL_Renderer *renderer, Text *text)
+void UI_text_render(SDL_Renderer *renderer, UI_Text *_text)
 {
-  if (!text || !text->text)
+  if (!_text || !_text->text)
     return;
 
-  TTF_Font *font = manager.get_managers()->font_manager->get(text->path ? text->path : "MSYH.TTC"); // 默认微软雅黑
+  UI_Text_internal *text = (UI_Text_internal *)_text;
+  TTF_Font *font = manager.get_managers()->font_manager->get(text->path ? text->path : DEFAULT_FONT); // 默认微软雅黑
   if (!font)
     return;
 
@@ -103,26 +121,7 @@ void text_render(SDL_Renderer *renderer, Text *text)
   TTF_SetFontSize(font, saved_size);
 }
 
-/*
- * texts 必填字段：
- * @param text
- * @param path
- * @param font_size
- * @param color
- */
-void text_init_multiple(Text *texts, int count)
-{
-  for (int i = 0; i < count; i++)
-    text_init(&texts[i]);
-}
-
-void text_render_multiple(SDL_Renderer *renderer, Text *texts, int count)
-{
-  for (int i = 0; i < count; i++)
-    text_render(renderer, &texts[i]);
-}
-
-void text_deinit()
+void UI_text_deinit()
 {
   for (int i = 0; i < arrlen(text_arr); i++)
     SDL_DestroyTexture(text_arr[i].texture);

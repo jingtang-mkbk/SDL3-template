@@ -1,5 +1,17 @@
 #include "music_manager.h"
 
+typedef struct MusicData
+{
+  MIX_Audio *audio;
+  MIX_Track *track;
+} MusicData;
+
+typedef struct MusicEntry
+{
+  char *key;
+  MusicData value;
+} MusicEntry;
+
 static MusicEntry *music_map = NULL; /* string → {audio, track} hash table */
 static MIX_Mixer *mixer = NULL;
 

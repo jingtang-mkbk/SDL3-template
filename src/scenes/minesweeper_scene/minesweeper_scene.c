@@ -4,10 +4,10 @@
 
 /* 前向声明（辅助函数定义在文件后部） */
 static SDL_Color mine_number_color(int n);
-static Text *make_text(const SDL_FRect *rect, const char *str, SDL_Color color);
-static void free_text(Text **t);
-static Text *make_content_text(const Cell *cell);
-static Text *make_flag_text(const Cell *cell);
+static UI_Text *make_text(const SDL_FRect *rect, const char *str, SDL_Color color);
+static void free_text(UI_Text **t);
+static UI_Text *make_content_text(const Cell *cell);
+static UI_Text *make_flag_text(const Cell *cell);
 
 static Cell *parsejson2cells(const char *filepath)
 {
@@ -268,26 +268,20 @@ static SDL_Color mine_number_color(int n)
 }
 
 /* 创建居中文本 */
-static Text *make_text(const SDL_FRect *rect, const char *str, SDL_Color color)
+static UI_Text *make_text(const SDL_FRect *rect, const char *str, SDL_Color color)
 {
-  Text *t = SDL_calloc(1, sizeof(Text));
-  t->base = (Event){
-      .rect = *rect,
-      .on_click = NULL,
-      .on_mouseenter = NULL,
-      .event_userdata = NULL,
-  };
+  UI_Text *t = UI_text_create();
+  t->base = (Event){.rect = *rect};
   t->text = SDL_strdup(str);
   t->path = "MSYHBD.TTC";
   t->font_size = 40;
   t->color = color;
-  t->texture = NULL;
   t->textalign = TextAlign_Center;
-  text_init(t);
+  UI_text_init(t);
   return t;
 }
 
-static void free_text(Text **t)
+static void free_text(UI_Text **t)
 {
   if (*t)
   {
@@ -298,7 +292,7 @@ static void free_text(Text **t)
 }
 
 /* 翻开后显示的内容：雷 ● / 数字 */
-static Text *make_content_text(const Cell *cell)
+static UI_Text *make_content_text(const Cell *cell)
 {
   if (cell->isMine)
     return make_text(&cell->rect, "●", (SDL_Color){255, 80, 80, 255});
@@ -307,7 +301,7 @@ static Text *make_content_text(const Cell *cell)
 }
 
 /* 插旗显示的 F */
-static Text *make_flag_text(const Cell *cell)
+static UI_Text *make_flag_text(const Cell *cell)
 {
   return make_text(&cell->rect, "F", (SDL_Color){255, 200, 0, 255});
 }
@@ -395,42 +389,38 @@ static void init(AppState *state)
   state->scene_data = d;
 
   // back
-  Text *back_text = SDL_calloc(1, sizeof(Text));
+  UI_Text *back_text = UI_text_create();
   back_text->base = (Event){
       .rect = (SDL_FRect){.x = 5, .y = 5, .w = 0, .h = 0},
       .on_click = back_clicked,
-      .on_mouseenter = NULL,
       .event_userdata = state,
   };
   back_text->text = "Back";
   back_text->path = NULL;
   back_text->font_size = 24;
   back_text->color = (SDL_Color){255, 255, 255, 255};
-  back_text->texture = NULL;
-  text_init(back_text);
+  UI_text_init(back_text);
   d->back_tex = back_text;
 
   // restart（Back 下方）
-  Text *restart_text = SDL_calloc(1, sizeof(Text));
+  UI_Text *restart_text = UI_text_create();
   restart_text->base = (Event){
       .rect = (SDL_FRect){.x = 5, .y = 40, .w = 0, .h = 0},
       .on_click = restart_clicked,
-      .on_mouseenter = NULL,
       .event_userdata = state,
   };
   restart_text->text = "Restart";
   restart_text->path = NULL;
   restart_text->font_size = 24;
   restart_text->color = (SDL_Color){255, 255, 255, 255};
-  restart_text->texture = NULL;
-  text_init(restart_text);
+  UI_text_init(restart_text);
   d->restart_tex = restart_text;
 
   // 初始化雷
   initMine(state);
 
   // grid
-  Event *grid = SDL_calloc(1, sizeof(Event));
+  Event *grid = event_create();
   grid->rect = (SDL_FRect){.x = 100, .y = 0, .w = 600, .h = 600};
   grid->on_click = grid_clicked;
   grid->on_click_right = grid_rightclicked;
@@ -442,37 +432,25 @@ static void init(AppState *state)
   // Game Over 文字（居中显示，游戏结束才渲染）
   int pw, ph;
   SDL_GetCurrentRenderOutputSize(state->renderer, &pw, &ph);
-  Text *go = SDL_calloc(1, sizeof(Text));
-  go->base = (Event){
-      .rect = (SDL_FRect){.x = 0, .y = 0, .w = (float)pw, .h = (float)ph},
-      .on_click = NULL,
-      .on_mouseenter = NULL,
-      .event_userdata = NULL,
-  };
+  UI_Text *go = UI_text_create();
+  go->base = (Event){.rect = (SDL_FRect){.x = 0, .y = 0, .w = (float)pw, .h = (float)ph}};
   go->text = SDL_strdup("Game Over");
   go->path = "MSYHBD.TTC";
   go->font_size = 60;
   go->color = (SDL_Color){255, 60, 60, 255};
-  go->texture = NULL;
   go->textalign = TextAlign_Center;
-  text_init(go);
+  UI_text_init(go);
   d->game_over_text = go;
 
   // You Win 文字（居中显示，胜利才渲染）
-  Text *win = SDL_calloc(1, sizeof(Text));
-  win->base = (Event){
-      .rect = (SDL_FRect){.x = 0, .y = 0, .w = (float)pw, .h = (float)ph},
-      .on_click = NULL,
-      .on_mouseenter = NULL,
-      .event_userdata = NULL,
-  };
+  UI_Text *win = UI_text_create();
+  win->base = (Event){.rect = (SDL_FRect){.x = 0, .y = 0, .w = (float)pw, .h = (float)ph}};
   win->text = SDL_strdup("You Win");
   win->path = "MSYHBD.TTC";
   win->font_size = 60;
   win->color = (SDL_Color){80, 255, 120, 255};
-  win->texture = NULL;
   win->textalign = TextAlign_Center;
-  text_init(win);
+  UI_text_init(win);
   d->win_text = win;
 
   /* 开启混合模式，否则 SDL_RenderFillRect 会忽略 alpha */
@@ -504,8 +482,8 @@ static void iterate(AppState *state)
   SDL_RenderClear(state->renderer);
 
   // Back / Restart
-  text_render(state->renderer, d->back_tex);
-  text_render(state->renderer, d->restart_tex);
+  UI_text_render(state->renderer, d->back_tex);
+  UI_text_render(state->renderer, d->restart_tex);
   // grid
   for (int i = 0; i < arrlen(d->cells); i++)
   {
@@ -520,7 +498,7 @@ static void iterate(AppState *state)
       SDL_SetRenderDrawColor(state->renderer, color.r, color.g, color.b, a);
       SDL_RenderFillRect(state->renderer, rect);
       if (c->text)
-        text_render(state->renderer, c->text);
+        UI_text_render(state->renderer, c->text);
     }
     else if (c->status == MineType_Flag)
     {
@@ -528,7 +506,7 @@ static void iterate(AppState *state)
       SDL_SetRenderDrawColor(state->renderer, color.r, color.g, color.b, a);
       SDL_RenderFillRect(state->renderer, rect);
       if (c->text)
-        text_render(state->renderer, c->text); /* 显示 F */
+        UI_text_render(state->renderer, c->text); /* 显示 F */
     }
     else /* MineType_Hidden */
     {
@@ -541,9 +519,9 @@ static void iterate(AppState *state)
 
   // 胜利 / 失败 居中显示
   if (d->win && d->win_text)
-    text_render(state->renderer, d->win_text);
+    UI_text_render(state->renderer, d->win_text);
   else if (d->game_over && d->game_over_text)
-    text_render(state->renderer, d->game_over_text);
+    UI_text_render(state->renderer, d->game_over_text);
 
   SDL_RenderPresent(state->renderer);
 }
@@ -568,7 +546,7 @@ static void deinit(AppState *state)
   }
   SDL_free(d->grid);
   SDL_free(state->scene_data);
-  text_deinit();
+  UI_text_deinit();
   state->scene_data = NULL;
 }
 

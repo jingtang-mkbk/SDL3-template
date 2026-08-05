@@ -6,12 +6,6 @@
 
 #define IMAGE_BASE_PATH "assets/imgs/"
 
-typedef struct ImageEntry
-{
-  char *key;
-  SDL_Texture *value;
-} ImageEntry;
-
 typedef struct ImageManager
 {
   void (*init)(void);

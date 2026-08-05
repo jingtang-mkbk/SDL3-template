@@ -6,18 +6,6 @@
 
 #define MUSIC_BASE_PATH "assets/music/"
 
-typedef struct MusicData
-{
-  MIX_Audio *audio;
-  MIX_Track *track;
-} MusicData;
-
-typedef struct MusicEntry
-{
-  char *key;
-  MusicData value;
-} MusicEntry;
-
 typedef struct MusicManager
 {
   bool (*init)(void);

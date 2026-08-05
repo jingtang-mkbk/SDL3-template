@@ -18,10 +18,9 @@ typedef struct Event
   void (*on_mouseenter)(SDL_Event *event, void *userdata);
   void (*on_mouseleave)(SDL_Event *event, void *userdata);
   void *event_userdata;
-  /* 内部状态：鼠标当前是否在元素内（用于检测 leave） */
-  bool in_rect;
 } Event;
 
 void mouseevent_handle(SDL_Renderer *renderer, SDL_Event *event, Event *base, const Uint8 event_flags);
+Event *event_create(void);
 
 #endif // EVENT_H

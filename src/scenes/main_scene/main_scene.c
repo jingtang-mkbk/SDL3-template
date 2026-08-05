@@ -27,9 +27,9 @@ static void init(AppState *state)
   shput(click_map, "3", ((ClickCB){tiger_clicked, state}));
 
   /* 从 JSON 解析元素 */
-  d->arr = render_json2element("assets/json/main_scene.json");
+  d->arr = Render_json2element("assets/json/main_scene.json");
 
-  render_init(state->renderer, d->arr);
+  Render_init(state->renderer, d->arr);
 
   /* 用 JSON 中的 id 自动绑定回调（不重复写 id） */
   for (int i = 0; i < arrlen(d->arr); i++)
@@ -38,7 +38,7 @@ static void init(AppState *state)
       continue;
     ClickCB cb = shget(click_map, d->arr[i].id);
     if (cb.fn)
-      render_set_callback(d->arr, d->arr[i].id, cb.fn, cb.userdata);
+      Render_set_callback(d->arr, d->arr[i].id, cb.fn, cb.userdata);
   }
 
   /* 居中 */
@@ -47,7 +47,7 @@ static void init(AppState *state)
   const char *center_ids[] = {"1", "2"};
   for (int i = 0; i < 2; i++)
   {
-    Render_Element *el = render_find_by_id(d->arr, center_ids[i]);
+    Render_Element *el = Render_find_by_id(d->arr, center_ids[i]);
     if (el)
     {
       Event *base = (Event *)el->element;
@@ -79,14 +79,14 @@ static void iterate(AppState *state)
 
   SDL_SetRenderDrawColor(state->renderer, 50, 50, 50, 255);
   SDL_RenderClear(state->renderer);
-  render(state->renderer, d->arr);
+  Render_render(state->renderer, d->arr);
   SDL_RenderPresent(state->renderer);
 }
 
 static void deinit(AppState *state)
 {
   MainSceneData *d = SCENE_DATA(state, MainSceneData);
-  render_deinit(d->arr);
+  Render_deinit(d->arr);
   shfree(click_map);
   click_map = NULL;
   SDL_free(state->scene_data);
