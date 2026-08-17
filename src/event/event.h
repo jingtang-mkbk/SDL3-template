@@ -12,15 +12,16 @@
 
 typedef struct Event
 {
-  SDL_FRect rect;
-  void (*on_click)(SDL_Event *event, void *userdata);
-  void (*on_click_right)(SDL_Event *event, void *userdata);
-  void (*on_mouseenter)(SDL_Event *event, void *userdata);
-  void (*on_mouseleave)(SDL_Event *event, void *userdata);
-  void *event_userdata;
+    SDL_FRect rect;
+    void (*click)(SDL_Event *event, void *userdata);
+    void (*click_right)(SDL_Event *event, void *userdata);
+    void (*mouseenter)(SDL_Event *event, void *userdata);
+    void (*mouseleave)(SDL_Event *event, void *userdata);
+    void *event_userdata;
 } Event;
 
-void mouseevent_handle(SDL_Renderer *renderer, SDL_Event *event, Event *base, const Uint8 event_flags);
+void mouseevent_handle(SDL_Renderer *renderer, SDL_Event *event, Event *base,
+                       const Uint8 event_flags);
 Event *event_create(void);
 
 #endif // EVENT_H

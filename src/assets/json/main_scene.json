@@ -23,6 +23,16 @@
       "children": null
     },
     {
+      "id": "Gomoku",
+      "type": "TEXT",
+      "text": "Gomoku",
+      "font_size": 48,
+      "color": "#FFFFFF",
+      "y": 120,
+      "parent": null,
+      "children": null
+    },
+    {
       "id": "3",
       "type": "IMAGE",
       "path": "gs_tiger.svg",

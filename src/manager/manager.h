@@ -14,16 +14,16 @@
 
 typedef struct Managers
 {
-  const FontManager *font_manager;
-  const ImageManager *image_manager;
-  const MusicManager *music_manager;
+    const FontManager *font_manager;
+    const ImageManager *image_manager;
+    const MusicManager *music_manager;
 } Managers;
 
 typedef struct Manager
 {
-  void (*init)(Uint8 flags);
-  void (*deinit)(void);
-  Managers *(*get_managers)(void);
+    void (*init)(Uint8 flags);
+    void (*deinit)(void);
+    Managers *(*get_managers)(void);
 } Manager;
 
 extern const Manager manager;

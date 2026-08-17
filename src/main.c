@@ -1,11 +1,12 @@
 #define SDL_MAIN_USE_CALLBACKS 1 /* use the callbacks instead of main() */
 #define STB_DS_IMPLEMENTATION    /* generate stb_ds function bodies in this TU */
 
-#include <SDL3/SDL_main.h>
 #include "manager/manager.h"
+#include "platform/platform.h"
+#include "scenes/gomoku_scene/gomoku_scene.h"
 #include "scenes/main_scene/main_scene.h"
 #include "scenes/minesweeper_scene/minesweeper_scene.h"
-#include "platform/platform.h"
+#include <SDL3/SDL_main.h>
 
 /* Scene switcher: call with scene name string to request a switch next frame */
 void switch_scene(AppState *state, const char *name)
@@ -25,8 +26,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     /* Must allocate on heap, stack variable would be destroyed after return */
     AppState *state = (AppState *)SDL_calloc(1, sizeof(AppState));
-    if (!state)
-    {
+    if (!state) {
         return SDL_APP_FAILURE;
     }
 
@@ -34,8 +34,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     getWithHeightFromPlatform(&width, &height);
 
     /* Create the window */
-    if (!SDL_CreateWindowAndRenderer("SDL3-Template", width, height, flag, &state->window, &state->renderer))
-    {
+    if (!SDL_CreateWindowAndRenderer("SDL3-Template 示例", width, height, flag, &state->window,
+                                     &state->renderer)) {
         SDL_Log("Couldn't create window and renderer: %s", SDL_GetError());
         SDL_free(state);
         return SDL_APP_FAILURE;
@@ -47,6 +47,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     state->scene_map = NULL;
     shput(state->scene_map, "main_scene", &main_scene);
     shput(state->scene_map, "minesweeper_scene", &minesweeper_scene);
+    shput(state->scene_map, "gomoku_scene", &gomoku_scene);
 
     /* Boot the first scene */
     state->current_scene = &main_scene;
@@ -74,8 +75,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     AppState *state = (AppState *)appstate;
 
     /* Check for pending scene switch */
-    if (state->next_scene != state->current_scene)
-    {
+    if (state->next_scene != state->current_scene) {
         state->current_scene->deinit(state);
         state->current_scene = state->next_scene;
         state->current_scene->init(state);
@@ -89,8 +89,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
     AppState *state = (AppState *)appstate;
-    if (state)
-    {
+    if (state) {
         shfree(state->scene_map);
         SDL_free(state);
     }

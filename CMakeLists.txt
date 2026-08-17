@@ -44,6 +44,7 @@ add_executable(main WIN32
     src/ui/image.c
     src/scenes/main_scene/main_scene.c
     src/scenes/minesweeper_scene/minesweeper_scene.c
+    src/scenes/gomoku_scene/gomoku_scene.c
     src/platform/platform.c
     three-party/cJSON/cJSON.c
 )

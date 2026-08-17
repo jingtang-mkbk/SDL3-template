@@ -2,9 +2,8 @@
 
 SDL_Color parse_color(const char *hex)
 {
-    SDL_Color c = {0, 0, 0, 255};
-    if (hex && hex[0] == '#')
-    {
+    SDL_Color c = { 0, 0, 0, 255 };
+    if (hex && hex[0] == '#') {
         unsigned int r, g, b, a = 255;
         int len = SDL_strlen(hex);
         if (len == 9)
@@ -21,7 +20,6 @@ SDL_Color parse_color(const char *hex)
 
 bool hit_in_rect(const SDL_FRect *rect, float mx, float my)
 {
-    return rect &&
-           mx >= rect->x && mx <= rect->x + rect->w &&
-           my >= rect->y && my <= rect->y + rect->h;
+    return rect && mx >= rect->x && mx <= rect->x + rect->w && my >= rect->y &&
+           my <= rect->y + rect->h;
 }

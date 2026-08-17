@@ -1,9 +1,9 @@
 #ifndef TEXT_H
 #define TEXT_H
 
-#include <SDL3_ttf/SDL_ttf.h>
 #include "event/event.h"
 #include "manager/manager.h"
+#include <SDL3_ttf/SDL_ttf.h>
 
 // clang-format off
 typedef enum UI_TextAlign
@@ -22,17 +22,20 @@ typedef enum UI_TextAlign
 // clang-format on
 typedef struct UI_Text
 {
-  Event base;
-  char *text;
-  char *path;
-  float font_size;
-  SDL_Color color;
-  UI_TextAlign textalign;
+    Event base;
+    char *text;
+    char *path;
+    float font_size;
+    SDL_Color color;
+    UI_TextAlign textalign;
 } UI_Text;
 
-void UI_text_init(UI_Text *text);
-void UI_text_render(SDL_Renderer *renderer, UI_Text *text);
-void UI_text_deinit(void);
-UI_Text *UI_text_create(void);
+// Create
+UI_Text *UI_Text_CreateWithProp(SDL_FRect rect, char *text, char *path, float fontSize,
+                                SDL_Color color, UI_TextAlign textalign);
+// Render
+void UI_Text_Render(SDL_Renderer *renderer, UI_Text *text);
+// Deinit
+void UI_Text_Deinit(void);
 
 #endif /* TEXT_H */
