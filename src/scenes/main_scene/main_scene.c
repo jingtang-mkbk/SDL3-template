@@ -1,14 +1,59 @@
 #include "main_scene.h"
 
-static void switch_clicked(SDL_Event *event, void *userdata)
+static void minesweeper_clicked(SDL_Event *event, void *userdata)
 {
     AppState *state = (AppState *)userdata;
     state->switch_scene(state, "minesweeper_scene");
 }
 
-static void test_clicked(SDL_Event *event, void *userdata)
+static void mousedown(SDL_Event *event, void *userdata)
 {
-    SDL_Log("Test clicked\n");
+    SDL_Log("Test mousedown\n");
+}
+
+static void mouseup(SDL_Event *event, void *userdata)
+{
+    SDL_Log("Test mouseup\n");
+}
+
+static void mouseenter(SDL_Event *event, void *userdata)
+{
+    SDL_Log("Test mouseenter\n");
+}
+
+static void mouseleave(SDL_Event *event, void *userdata)
+{
+    SDL_Log("Test mouseleave\n");
+}
+
+static void mousemove(SDL_Event *event, void *userdata)
+{
+    SDL_Log("Test mousemove\n");
+}
+
+static void mousehover(SDL_Event *event, void *userdata)
+{
+    SDL_Log("Test mousehover\n");
+}
+
+static void click(SDL_Event *event, void *userdata)
+{
+    SDL_Log("Test click\n");
+}
+
+static void click_right(SDL_Event *event, void *userdata)
+{
+    SDL_Log("Test click_right\n");
+}
+
+static void mousedown_right(SDL_Event *event, void *userdata)
+{
+    SDL_Log("Test mousedown_right\n");
+}
+
+static void mouseup_right(SDL_Event *event, void *userdata)
+{
+    SDL_Log("Test mouseup_right\n");
 }
 
 static void tiger_clicked(SDL_Event *event, void *userdata)
@@ -27,37 +72,33 @@ static void init(AppState *state)
     MainSceneData *d = (MainSceneData *)SDL_calloc(1, sizeof(MainSceneData));
     state->scene_data = d;
 
-    /* 注册回调（id 只写一次） */
-    shput(click_map, "1", ((ClickCB){ switch_clicked, state }));
-    shput(click_map, "2", ((ClickCB){ test_clicked, state }));
-    shput(click_map, "3", ((ClickCB){ tiger_clicked, state }));
-    shput(click_map, "Gomoku", ((ClickCB){ gomoku_clicked, state }));
-
-    /* 从 JSON 解析元素 */
-    d->arr = Render_json2element(state->renderer, "assets/json/main_scene.json");
-
-    Render_init(state->renderer, d->arr);
-
-    /* 用 JSON 中的 id 自动绑定回调（不重复写 id） */
-    for (int i = 0; i < arrlen(d->arr); i++) {
-        if (!d->arr[i].id)
-            continue;
-        ClickCB cb = shget(click_map, d->arr[i].id);
-        if (cb.fn)
-            Render_set_callback(d->arr, d->arr[i].id, cb.fn, cb.userdata);
-    }
+    d->MineSweeper = UI_Text_CreateWithClick((SDL_FRect){ 0, 0, 0, 0 }, "Mine Sweeper", NULL, 48, TextAlign_None, state, minesweeper_clicked);
+    /* 复合字面量直接作为参数传（UI_SetMultiEvent 内部会拷贝，临时对象仅需存活到调用结束） */
+    d->Test = UI_Text_CreateWithMultiEvent(
+        (SDL_FRect){ 0, 60, 0, 0 }, "Test", NULL, 48, TextAlign_None, state,
+        (Event_Userevent[]){
+            { MOUSEEVENT_DOWN, mousedown },
+            { MOUSEEVENT_UP, mouseup },
+            { MOUSEEVENT_ENTER, mouseenter },
+            { MOUSEEVENT_LEAVE, mouseleave },
+            { MOUSEEVENT_CLICK, click },
+            { MOUSEEVENT_CLICK_RIGHT, click_right },
+            { MOUSEEVENT_DOWN_RIGHT, mousedown_right },
+            { MOUSEEVENT_UP_RIGHT, mouseup_right },
+        },
+        8);
+    d->Gomoku = UI_Text_Create((SDL_FRect){ 0, 120, 0, 0 }, "Gomoku", NULL, 48, TextAlign_None);
+    d->Tiger = UI_Image_Create(state->renderer, "gs_tiger.svg", (SDL_FRect){ 100, 100, 200, 200 });
 
     /* 居中 */
     int pw, ph;
     SDL_GetCurrentRenderOutputSize(state->renderer, &pw, &ph);
-    const char *center_ids[] = { "1", "2", "Gomoku" };
-    for (int i = 0; i < 3; i++) {
-        Render_Element *el = Render_find_by_id(d->arr, center_ids[i]);
-        if (el) {
-            Event *base = (Event *)el->element;
-            base->rect.x = (pw - base->rect.w) / 2.0f;
-        }
-    }
+    d->MineSweeper->base.rect.x = (pw - d->MineSweeper->base.rect.w) / 2.0f;
+    d->Test->base.rect.x = (pw - d->Test->base.rect.w) / 2.0f;
+    d->Gomoku->base.rect.x = (pw - d->Gomoku->base.rect.w) / 2.0f;
+
+    // UI_SetClickWithUserdata((UI_Event *)d->Test, state, test_mousedown);
+    UI_SetClickWithUserdata((UI_Event *)d->Gomoku, state, gomoku_clicked);
 
     /* Start background music（play 未加载时会自动 load） */
     manager.get_managers()->music_manager->play("the_entertainer.ogg");
@@ -72,8 +113,9 @@ static void event(AppState *state, SDL_Event *event)
         return;
     }
 
-    for (int i = 0; i < arrlen(d->arr); i++)
-        mouseevent_handle(state->renderer, event, d->arr[i].element, EVENT_CLICK);
+    mouseevent(state->renderer, event, (UI_Event *)d->MineSweeper);
+    mouseevent(state->renderer, event, (UI_Event *)d->Test);
+    mouseevent(state->renderer, event, (UI_Event *)d->Gomoku);
 }
 
 static void iterate(AppState *state)
@@ -82,16 +124,19 @@ static void iterate(AppState *state)
 
     SDL_SetRenderDrawColor(state->renderer, 50, 50, 50, 255);
     SDL_RenderClear(state->renderer);
-    Render_render(state->renderer, d->arr);
+    UI_Image_Render(state->renderer, d->Tiger);
+    UI_Text_Render(state->renderer, d->MineSweeper);
+    UI_Text_Render(state->renderer, d->Test);
+    UI_Text_Render(state->renderer, d->Gomoku);
+    // Render_render(state->renderer, d->arr);
     SDL_RenderPresent(state->renderer);
 }
 
 static void deinit(AppState *state)
 {
     MainSceneData *d = SCENE_DATA(state, MainSceneData);
-    Render_deinit(d->arr);
-    shfree(click_map);
-    click_map = NULL;
+    UI_Image_Deinit();
+    UI_Text_Deinit();
     SDL_free(state->scene_data);
     state->scene_data = NULL;
 }

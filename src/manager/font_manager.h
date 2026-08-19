@@ -4,7 +4,11 @@
 #include "data.h"
 #include <SDL3_ttf/SDL_ttf.h>
 
-#define FONT_BASE_PATH "assets/fonts/"
+#define DEFAULT_FONT_PATH   "assets/fonts/"
+#define DEFAULT_FONT_SIZE   12
+#define FONT_COLOR_WHITE    (SDL_Color){ 255, 255, 255, 255 }
+#define FONT_COLOR_BLACK    (SDL_Color){ 255, 255, 255, 255 }
+#define DEFAULT_FONT_FAMILY "MSYH.TTC"
 
 typedef struct FontManager
 {

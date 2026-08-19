@@ -254,8 +254,7 @@ static SDL_Color mine_number_color(int n)
 /* 创建居中文本 */
 static UI_Text *make_text(const SDL_FRect *rect, const char *str, SDL_Color color)
 {
-    return UI_Text_CreateWithProp(*rect, SDL_strdup(str), "MSYHBD.TTC", 40, color,
-                                  TextAlign_Center);
+    return UI_Text_Create(*rect, SDL_strdup(str), "MSYHBD.TTC", 40, TextAlign_Center);
 }
 
 static void free_text(UI_Text **t)
@@ -358,45 +357,46 @@ static void init(AppState *state)
     state->scene_data = d;
 
     // back
-    UI_Text *back_text =
-        UI_Text_CreateWithProp((SDL_FRect){ .x = 5, .y = 5, .w = 0, .h = 0 }, "Back", NULL, 24,
-                               (SDL_Color){ 255, 255, 255, 255 }, TextAlign_None);
-    back_text->base.click = back_clicked;
-    back_text->base.event_userdata = state;
-    d->back_tex = back_text;
+    d->back_tex = UI_Text_CreateWithClick((SDL_FRect){ 5, 5, 0, 0 }, "Back", NULL, 24, TextAlign_None, state, back_clicked);
 
     // restart（Back 下方）
-    UI_Text *restart_text =
-        UI_Text_CreateWithProp((SDL_FRect){ .x = 5, .y = 40, .w = 0, .h = 0 }, "Restart", NULL, 24,
-                               (SDL_Color){ 255, 255, 255, 255 }, TextAlign_None);
-    restart_text->base.click = restart_clicked;
-    restart_text->base.event_userdata = state;
-    d->restart_tex = restart_text;
+    d->restart_tex = UI_Text_CreateWithClick((SDL_FRect){ 5, 40, 0, 0 }, "Restart", NULL, 24, TextAlign_None, state, restart_clicked);
 
     // 初始化雷
     initMine(state);
 
     // grid
-    Event *grid = event_create();
-    grid->rect = (SDL_FRect){ .x = 100, .y = 0, .w = 600, .h = 600 };
-    grid->click = grid_clicked;
-    grid->click_right = grid_rightclicked;
-    grid->mouseenter = grid_mouseenter;
-    grid->mouseleave = grid_mouseleave;
-    grid->event_userdata = state;
-    d->grid = grid;
+    d->grid = ui_base_create();
+    // grid->rect = (SDL_FRect){ .x = 100, .y = 0, .w = 600, .h = 600 };
+    // grid->event.click = grid_clicked;
+    // grid->event.click_right = grid_rightclicked;
+    // grid->event.mouseenter = grid_mouseenter;
+    // grid->event.mouseleave = grid_mouseleave;
+    // grid->event.userdata = state;
+    // grid->event.userevent_count = 0;
+    // grid->event.userevent_arr = NULL;
+    UI_SetPosition(d->grid, 100, 0);
+    UI_SetSize(d->grid, 600, 600);
+    UI_SetMultiEvent(d->grid, state, (Event_Userevent[]){
+                                         { MOUSEEVENT_CLICK, grid_clicked },
+                                         { MOUSEEVENT_CLICK_RIGHT, grid_rightclicked },
+                                         { MOUSEEVENT_ENTER, grid_mouseenter },
+                                         { MOUSEEVENT_LEAVE, grid_mouseleave },
+                                     },
+                     4);
+    // d->grid = grid;
 
     // Game Over 文字（居中显示，游戏结束才渲染）
     int pw, ph;
     SDL_GetCurrentRenderOutputSize(state->renderer, &pw, &ph);
-    d->game_over_text = UI_Text_CreateWithProp(
-        (SDL_FRect){ .x = 0, .y = 0, .w = (float)pw, .h = (float)ph }, SDL_strdup("Game Over"),
-        "MSYHBD.TTC", 60, (SDL_Color){ 255, 60, 60, 255 }, TextAlign_Center);
+    d->game_over_text = UI_Text_Create(
+        (SDL_FRect){ 0, 0, (float)pw, (float)ph }, SDL_strdup("Game Over"),
+        "MSYHBD.TTC", 60, TextAlign_Center);
 
     // You Win 文字（居中显示，胜利才渲染）
-    d->win_text = UI_Text_CreateWithProp(
-        (SDL_FRect){ .x = 0, .y = 0, .w = (float)pw, .h = (float)ph }, SDL_strdup("You Win"),
-        "MSYHBD.TTC", 60, (SDL_Color){ 80, 255, 120, 255 }, TextAlign_Center);
+    d->win_text = UI_Text_Create(
+        (SDL_FRect){ 0, 0, (float)pw, (float)ph }, SDL_strdup("You Win"),
+        "MSYHBD.TTC", 60, TextAlign_Center);
 
     /* 开启混合模式，否则 SDL_RenderFillRect 会忽略 alpha */
     SDL_SetRenderDrawBlendMode(state->renderer, SDL_BLENDMODE_BLEND);
@@ -411,10 +411,9 @@ static void event(AppState *state, SDL_Event *event)
         return;
     }
 
-    mouseevent_handle(state->renderer, event, &d->back_tex->base, EVENT_CLICK);
-    mouseevent_handle(state->renderer, event, &d->restart_tex->base, EVENT_CLICK);
-    mouseevent_handle(state->renderer, event, d->grid,
-                      EVENT_CLICK | EVENT_CLICK_RIGHT | EVENT_HOVER | EVENT_LEAVE);
+    mouseevent(state->renderer, event, (UI_Event *)d->back_tex);
+    mouseevent(state->renderer, event, (UI_Event *)d->restart_tex);
+    mouseevent(state->renderer, event, (UI_Event *)d->grid);
 }
 
 static void iterate(AppState *state)

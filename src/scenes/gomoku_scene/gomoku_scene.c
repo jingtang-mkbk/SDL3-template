@@ -12,11 +12,11 @@ static void init(AppState *state)
 
     // 背景
     d->background_img =
-        UI_Image_CreateWithProp(state->renderer, "gomoku.png", (SDL_FRect){ 0, 0, 800, 800 });
+        UI_Image_Create(state->renderer, "gomoku.png", (SDL_FRect){ 0, 0, 800, 800 });
 
     // 白子
     d->whiteArr =
-        UI_Image_CreateWithProp(state->renderer, "white.png", (SDL_FRect){ 100, 100, 40, 40 });
+        UI_Image_Create(state->renderer, "white.png", (SDL_FRect){ 100, 100, 40, 40 });
 
     // 黑子
 }

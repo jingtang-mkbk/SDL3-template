@@ -47,12 +47,13 @@ static void load(const char *font_path)
         return;
 
     char full[100];
-    SDL_snprintf(full, sizeof(full), "%s%s", FONT_BASE_PATH, font_path);
+    SDL_snprintf(full, sizeof(full), "%s%s", DEFAULT_FONT_PATH, font_path);
     TTF_Font *font = TTF_OpenFont(full, 12);
     if (!font) {
         SDL_Log("Failed to open font '%s': %s", full, SDL_GetError());
         return;
     }
+    TTF_SetFontSize(font, DEFAULT_FONT_SIZE);
     shput(font_map, font_path, font);
 }
 

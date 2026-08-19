@@ -4,7 +4,6 @@
 #include "stb_ds.h"
 #include <SDL3/SDL.h>
 
-#define DEFAULT_FONT "MSYH.TTC"
 /* ---- Convenience macro ---- */
 #define SCENE_DATA(state, Type) ((Type *)(state)->scene_data)
 
@@ -53,6 +52,5 @@ typedef struct
     char *key;
     ClickCB value;
 } ClickEntry;
-static ClickEntry *click_map = NULL;
 
 #endif // DATA_H
