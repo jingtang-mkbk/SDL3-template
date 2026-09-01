@@ -4,7 +4,6 @@
 #include "event/mouse_event.h"
 #include "manager/manager.h"
 #include <SDL3_image/SDL_image.h>
-#include <stdbool.h>
 
 typedef struct UI_Image
 {

@@ -9,13 +9,13 @@
 
 #include "data.h"
 #include "manager/font_manager.h"
-#include "manager/image_manager.h"
 #include "manager/music_manager.h"
+#include "manager/texture_manager.h"
 
 typedef struct Managers
 {
     const FontManager *font_manager;
-    const ImageManager *image_manager;
+    const TextureManager *texture_manager;
     const MusicManager *music_manager;
 } Managers;
 

@@ -25,8 +25,8 @@ static void init(Uint8 flags)
     }
 
     if (flags & MANAGER_FLAG_IMAGE) {
-        mgr->image_manager = &image_manager;
-        mgr->image_manager->init();
+        mgr->texture_manager = &texture_manager;
+        mgr->texture_manager->init();
     }
 
     if (flags & MANAGER_FLAG_MUSIC) {
@@ -41,8 +41,8 @@ static void deinit()
     if (mgr) {
         if (mgr->font_manager)
             mgr->font_manager->deinit();
-        if (mgr->image_manager)
-            mgr->image_manager->deinit();
+        if (mgr->texture_manager)
+            mgr->texture_manager->deinit();
         if (mgr->music_manager)
             mgr->music_manager->deinit();
         SDL_free(mgr);

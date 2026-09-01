@@ -9,7 +9,7 @@ UI_Image *UI_Image_Create(SDL_Renderer *renderer, char *path, SDL_FRect rect)
     img->base.visible = true;
     img->path = path;
 
-    SDL_Texture *tex = manager.get_managers()->image_manager->get(renderer, img->path);
+    SDL_Texture *tex = manager.get_managers()->texture_manager->load(renderer, img->path);
     if (!tex) {
         SDL_Log("UI_Image_Create: image '%s' not loaded", img->path);
         SDL_free(img);
@@ -72,5 +72,5 @@ void UI_Image_SetAplha(UI_Image *img, float alpha)
         return;
 
     img->base.alpha = SDL_clamp(alpha, 0.0f, 1.0f);
-    SDL_SetTextureAlphaMod(img->texture, (Uint8)(img->base.alpha * 255));
+    SDL_SetTextureAlphaMod(img->texture, (Uint8)(alpha * 255));
 }

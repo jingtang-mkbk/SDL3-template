@@ -36,11 +36,12 @@ add_executable(main WIN32
     src/utils/utils.c
     src/manager/manager.c
     src/manager/font_manager.c
-    src/manager/image_manager.c
+    src/manager/texture_manager.c
     src/manager/music_manager.c
     src/event/mouse_event.c
     src/ui/text.c
     src/ui/image.c
+    src/ui/sprite.c
     src/scenes/main_scene/main_scene.c
     src/scenes/minesweeper_scene/minesweeper_scene.c
     src/scenes/gomoku_scene/gomoku_scene.c

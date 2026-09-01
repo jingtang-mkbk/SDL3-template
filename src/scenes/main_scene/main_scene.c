@@ -88,7 +88,9 @@ static void init(AppState *state)
         },
         8);
     d->Gomoku = UI_Text_Create((SDL_FRect){ 0, 120, 0, 0 }, "Gomoku", NULL, 48, TextAlign_None);
-    d->Tiger = UI_Image_Create(state->renderer, "gs_tiger.svg", (SDL_FRect){ 100, 100, 200, 200 });
+    d->Tiger = UI_Image_Create(state->renderer, "imgs/gs_tiger.svg", (SDL_FRect){ 100, 100, 200, 200 });
+    d->SlimeGreen = UI_Sprite_Create(state->renderer, "sprites/SlimeGreen/SlimeBasic_00", (SDL_FRect){ 0, 100, 376, 256 }, 30, 1000);
+    d->SlimeOrange = UI_Sprite_Create(state->renderer, "sprites/SlimeOrange/SlimeOrange_00", (SDL_FRect){ 0, 300, 510, 410 }, 30, 2000);
 
     /* 居中 */
     int pw, ph;
@@ -128,6 +130,8 @@ static void iterate(AppState *state)
     UI_Text_Render(state->renderer, d->MineSweeper);
     UI_Text_Render(state->renderer, d->Test);
     UI_Text_Render(state->renderer, d->Gomoku);
+    UI_Sprite_Render(state->renderer, d->SlimeGreen);
+    UI_Sprite_Render(state->renderer, d->SlimeOrange);
     // Render_render(state->renderer, d->arr);
     SDL_RenderPresent(state->renderer);
 }
@@ -137,6 +141,7 @@ static void deinit(AppState *state)
     MainSceneData *d = SCENE_DATA(state, MainSceneData);
     UI_Image_Deinit();
     UI_Text_Deinit();
+    UI_Sprite_Deinit();
     SDL_free(state->scene_data);
     state->scene_data = NULL;
 }

@@ -206,6 +206,8 @@ void UI_SetVisible(UI_Event *base, bool visible)
 
 void UI_SetUserdata(UI_Event *base, void *userdata)
 {
+    if (!base)
+        return;
     base->event.userdata = userdata;
     base->event.event_mask = 0;
     base->event.mouse_in_rect = false;
@@ -214,7 +216,7 @@ void UI_SetUserdata(UI_Event *base, void *userdata)
 }
 
 /* 把某个事件类型注册进 userevent_arr（供 mouseevent() 分发）；已存在则更新回调 */
-static void ui_event_register(UI_Event *base, int type, void *fn)
+static void ui_event_register(UI_Event *base, MouseeventType type, void *fn)
 {
     for (int i = 0; i < arrlen(base->event.userevent_arr); i++) {
         if (base->event.userevent_arr[i].type == type) {
