@@ -11,7 +11,7 @@ typedef struct TextureManager
     SDL_Texture *(*get)(const char *path);
     SDL_Texture *(*load)(SDL_Renderer *renderer, const char *path);
     void (*remove)(const char *path);
-    SDL_Texture *(*load_sprite)(SDL_Renderer *renderer, const char *path, const Uint8 count);
+    SDL_Texture *(*load_sprite)(SDL_Renderer *renderer, const char *path, const Uint8 count, const char *suffix);
     void (*remove_sprite)(const char *path, const Uint8 count);
 } TextureManager;
 

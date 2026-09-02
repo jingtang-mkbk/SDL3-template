@@ -7,7 +7,7 @@
 
 typedef struct UI_Image
 {
-    UI_Event base;
+    Node node;
     char *path;
     SDL_Texture *texture;
 } UI_Image;
@@ -21,6 +21,6 @@ void UI_Image_Render(SDL_Renderer *renderer, UI_Image *img);
 // Deinit
 void UI_Image_Deinit(void);
 
-void UI_Image_SetAplha(UI_Image *img, float alpha);
+void UI_Image_SetAlpha(UI_Image *img, float alpha);
 
 #endif // IMAGE_H

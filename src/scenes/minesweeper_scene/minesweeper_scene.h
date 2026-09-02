@@ -31,7 +31,7 @@ typedef struct MinesweeperSceneData
     UI_Text *back_tex;
     UI_Text *restart_tex;
     Cell *cells;
-    UI_Event *grid;
+    Node *grid;
     bool game_over;
     bool win;
     UI_Text *game_over_text;

@@ -1,11 +1,9 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-// clang-format off
 #define MANAGER_FLAG_FONT  0x01
 #define MANAGER_FLAG_IMAGE 0x02
 #define MANAGER_FLAG_MUSIC 0x04
-// clang-format on
 
 #include "data.h"
 #include "manager/font_manager.h"

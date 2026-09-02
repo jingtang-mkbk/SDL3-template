@@ -6,7 +6,7 @@
 
 typedef struct UI_Sprite
 {
-    UI_Event base;
+    Node node;
     const char *path;
     SDL_Texture *texture;
     Uint8 count;             // 精灵数
@@ -24,6 +24,6 @@ void UI_Sprite_Render(SDL_Renderer *renderer, UI_Sprite *sprite);
 // Deinit
 void UI_Sprite_Deinit(void);
 
-void UI_Sprite_SetAplha(UI_Sprite *sprite, float alpha);
+void UI_Sprite_SetAlpha(UI_Sprite *sprite, float alpha);
 
 #endif /* SPRITE_H */

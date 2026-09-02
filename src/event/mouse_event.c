@@ -1,136 +1,136 @@
 #include "mouse_event.h"
 
-static bool check_in_rect(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static bool check_in_rect(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     SDL_ConvertEventToRenderCoordinates(renderer, event);
     float mx = event->button.x;
     float my = event->button.y;
 
-    return hit_in_rect(&base->rect, mx, my);
+    return hit_in_rect(&node->rect, mx, my);
 }
 
-static void mousedown(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void mousedown(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && event->button.button == SDL_BUTTON_LEFT) {
-        if (!check_in_rect(renderer, event, base))
+        if (!check_in_rect(renderer, event, node))
             return;
 
-        base->event.mousedown(event, base->event.userdata);
+        node->event.mousedown(event, node->event.userdata);
     }
 }
 
-static void mouseup(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void mouseup(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type == SDL_EVENT_MOUSE_BUTTON_UP && event->button.button == SDL_BUTTON_LEFT) {
-        if (!check_in_rect(renderer, event, base))
+        if (!check_in_rect(renderer, event, node))
             return;
 
-        base->event.mouseup(event, base->event.userdata);
+        node->event.mouseup(event, node->event.userdata);
     }
 }
 
-static void mouseenter(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void mouseenter(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type != SDL_EVENT_MOUSE_MOTION)
         return;
 
-    bool inside = check_in_rect(renderer, event, base);
+    bool inside = check_in_rect(renderer, event, node);
 
-    if (inside && !base->event.mouse_in_rect) {
-        base->event.mouseenter(event, base->event.userdata);
-        base->event.mouse_in_rect = true; /* 只有边沿进入才置位，避免覆盖 mouseleave 的检测 */
+    if (inside && !node->event.mouse_in_rect) {
+        node->event.mouseenter(event, node->event.userdata);
+        node->event.mouse_in_rect = true; /* 只有边沿进入才置位，避免覆盖 mouseleave 的检测 */
     }
 }
 
-static void mouseleave(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void mouseleave(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type != SDL_EVENT_MOUSE_MOTION)
         return;
 
-    bool inside = check_in_rect(renderer, event, base);
+    bool inside = check_in_rect(renderer, event, node);
 
-    if (!inside && base->event.mouse_in_rect) {
-        base->event.mouseleave(event, base->event.userdata);
-        base->event.mouse_in_rect = false; /* 只有边沿离开才复位，避免覆盖 mouseenter 的检测 */
+    if (!inside && node->event.mouse_in_rect) {
+        node->event.mouseleave(event, node->event.userdata);
+        node->event.mouse_in_rect = false; /* 只有边沿离开才复位，避免覆盖 mouseenter 的检测 */
     }
 }
 
-static void mousemove(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void mousemove(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type != SDL_EVENT_MOUSE_MOTION)
         return;
 
-    bool inside = check_in_rect(renderer, event, base);
+    bool inside = check_in_rect(renderer, event, node);
 
     if (inside) {
-        base->event.mouse_in_rect = true; /* 维护"在内"状态；移出交给 mouseleave 复位 */
-        if (base->event.mousemove)
-            base->event.mousemove(event, base->event.userdata);
+        node->event.mouse_in_rect = true; /* 维护"在内"状态；移出交给 mouseleave 复位 */
+        if (node->event.mousemove)
+            node->event.mousemove(event, node->event.userdata);
     }
 }
 
-static void mousehover(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void mousehover(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type != SDL_EVENT_MOUSE_MOTION)
         return;
 
-    bool inside = check_in_rect(renderer, event, base);
+    bool inside = check_in_rect(renderer, event, node);
     if (inside) {
-        base->event.mousehover(event, base->event.userdata);
+        node->event.mousehover(event, node->event.userdata);
     }
 }
 
-static void mousedown_right(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void mousedown_right(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && event->button.button == SDL_BUTTON_RIGHT) {
-        if (!check_in_rect(renderer, event, base))
+        if (!check_in_rect(renderer, event, node))
             return;
 
-        base->event.mousedown_right(event, base->event.userdata);
+        node->event.mousedown_right(event, node->event.userdata);
     }
 }
 
-static void mouseup_right(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void mouseup_right(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type == SDL_EVENT_MOUSE_BUTTON_UP && event->button.button == SDL_BUTTON_RIGHT) {
-        if (!check_in_rect(renderer, event, base))
+        if (!check_in_rect(renderer, event, node))
             return;
 
-        base->event.mouseup_right(event, base->event.userdata);
+        node->event.mouseup_right(event, node->event.userdata);
     }
 }
 
-static void click(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void click(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && event->button.button == SDL_BUTTON_LEFT) {
-        if (check_in_rect(renderer, event, base)) {
-            base->event.mousedown_flag = true;
+        if (check_in_rect(renderer, event, node)) {
+            node->event.mousedown_flag = true;
         }
     }
     if (event->type == SDL_EVENT_MOUSE_BUTTON_UP && event->button.button == SDL_BUTTON_LEFT) {
-        if (check_in_rect(renderer, event, base)) {
-            base->event.click(event, base->event.userdata);
+        if (check_in_rect(renderer, event, node)) {
+            node->event.click(event, node->event.userdata);
         }
-        base->event.mousedown_flag = false;
+        node->event.mousedown_flag = false;
     }
 }
 
-static void click_right(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void click_right(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && event->button.button == SDL_BUTTON_RIGHT) {
-        if (check_in_rect(renderer, event, base)) {
-            base->event.mousedown_right_flag = true;
+        if (check_in_rect(renderer, event, node)) {
+            node->event.mousedown_right_flag = true;
         }
     }
     if (event->type == SDL_EVENT_MOUSE_BUTTON_UP && event->button.button == SDL_BUTTON_RIGHT) {
-        if (check_in_rect(renderer, event, base)) {
-            base->event.click_right(event, base->event.userdata);
+        if (check_in_rect(renderer, event, node)) {
+            node->event.click_right(event, node->event.userdata);
         }
-        base->event.mousedown_right_flag = false;
+        node->event.mousedown_right_flag = false;
     }
 }
 
-static void wheel(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+static void wheel(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (event->type != SDL_EVENT_MOUSE_WHEEL)
         return;
@@ -139,183 +139,194 @@ static void wheel(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
     float mx = event->wheel.mouse_x;
     float my = event->wheel.mouse_y;
 
-    if (!hit_in_rect(&base->rect, mx, my)) {
+    if (!hit_in_rect(&node->rect, mx, my)) {
         return;
     }
 
-    if (base->event.wheel)
-        base->event.wheel(event, base->event.userdata);
+    if (node->event.wheel)
+        node->event.wheel(event, node->event.userdata);
 }
 
-static bool checkUserdata(UI_Event *base)
+static bool checkUserdata(Node *node)
 {
-    if (!base->event.userdata) {
+    if (!node->event.userdata) {
         SDL_Log("Set userdata before event.\n");
         return false;
     } else
         return true;
 }
 
-UI_Event *ui_base_create(void)
+Node *Node_Create(void)
 {
-    return (UI_Event *)SDL_calloc(1, sizeof(UI_Event));
+    return (Node *)SDL_calloc(1, sizeof(Node));
 }
 
-void UI_SetPosition(UI_Event *base, float x, float y)
+void Node_Default(Node *node, NodeType type)
 {
-    if (!base)
-        return;
-
-    base->rect.x = x;
-    base->rect.y = y;
+    node->type = type;
+    node->alpha = 1.0f;
+    node->anchor = (SDL_FPoint){ 0.0f, 0.0f };
+    node->angle = 0.0f;
+    node->children = NULL;
+    node->visible = true;
+    node->z_index = 0;
 }
 
-void UI_SetSize(UI_Event *base, float w, float h)
+void Node_SetPosition(Node *node, float x, float y)
 {
-    if (!base)
+    if (!node)
         return;
 
-    base->rect.w = w;
-    base->rect.h = h;
+    node->rect.x = x;
+    node->rect.y = y;
 }
 
-void UI_SetAnchor(UI_Event *base, float offsetX, float offsetY)
+void Node_SetSize(Node *node, float w, float h)
 {
-    if (!base)
+    if (!node)
         return;
 
-    base->anchor.x = base->rect.x + offsetX;
-    base->anchor.y = base->rect.y + offsetY;
+    node->rect.w = w;
+    node->rect.h = h;
 }
 
-void UI_SetRotate(UI_Event *base, double deg)
+void Node_SetAnchor(Node *node, float offsetX, float offsetY)
 {
-    if (!base)
+    if (!node)
         return;
 
-    base->angle = deg;
+    node->anchor.x = node->rect.x + offsetX;
+    node->anchor.y = node->rect.y + offsetY;
 }
 
-void UI_SetVisible(UI_Event *base, bool visible)
+void Node_SetRotate(Node *node, double deg)
 {
-    if (!base)
+    if (!node)
         return;
 
-    base->visible = visible;
+    node->angle = deg;
 }
 
-void UI_SetUserdata(UI_Event *base, void *userdata)
+void Node_SetVisible(Node *node, bool visible)
 {
-    if (!base)
+    if (!node)
         return;
-    base->event.userdata = userdata;
-    base->event.event_mask = 0;
-    base->event.mouse_in_rect = false;
-    base->event.mousedown_flag = false;
-    base->event.mousedown_right_flag = false;
+
+    node->visible = visible;
+}
+
+void Node_SetUserdata(Node *node, void *userdata)
+{
+    if (!node)
+        return;
+    node->event.userdata = userdata;
+    node->event.event_mask = 0;
+    node->event.mouse_in_rect = false;
+    node->event.mousedown_flag = false;
+    node->event.mousedown_right_flag = false;
 }
 
 /* 把某个事件类型注册进 userevent_arr（供 mouseevent() 分发）；已存在则更新回调 */
-static void ui_event_register(UI_Event *base, MouseeventType type, void *fn)
+static void ui_event_register(Node *node, MouseeventType type, void *fn)
 {
-    for (int i = 0; i < arrlen(base->event.userevent_arr); i++) {
-        if (base->event.userevent_arr[i].type == type) {
-            base->event.userevent_arr[i].fn = (func_event)fn;
+    for (int i = 0; i < arrlen(node->event.userevent_arr); i++) {
+        if (node->event.userevent_arr[i].type == type) {
+            node->event.userevent_arr[i].fn = (func_event)fn;
             return;
         }
     }
     Event_Userevent e = { type, (func_event)fn };
-    arrput(base->event.userevent_arr, e);
-    base->event.userevent_count = (Uint8)arrlen(base->event.userevent_arr);
-    base->event.event_mask |= (1u << type);
+    arrput(node->event.userevent_arr, e);
+    node->event.userevent_count = (Uint8)arrlen(node->event.userevent_arr);
+    node->event.event_mask |= (1u << type);
 }
 
-void UI_SetClick(UI_Event *base, void *callback)
+void Node_SetClick(Node *node, void *callback)
 {
-    if (!base || !checkUserdata(base))
+    if (!node || !checkUserdata(node))
         return;
-    base->event.click = callback;
-    ui_event_register(base, MOUSEEVENT_CLICK, callback);
+    node->event.click = callback;
+    ui_event_register(node, MOUSEEVENT_CLICK, callback);
 }
 
-void UI_SetRightClick(UI_Event *base, void *callback)
+void Node_SetRightClick(Node *node, void *callback)
 {
-    if (!base || !checkUserdata(base))
+    if (!node || !checkUserdata(node))
         return;
-    base->event.click_right = callback;
-    ui_event_register(base, MOUSEEVENT_CLICK_RIGHT, callback);
+    node->event.click_right = callback;
+    ui_event_register(node, MOUSEEVENT_CLICK_RIGHT, callback);
 }
 
-void UI_SetMouseenter(UI_Event *base, void *callback)
+void Node_SetMouseenter(Node *node, void *callback)
 {
-    if (!base || !checkUserdata(base))
+    if (!node || !checkUserdata(node))
         return;
-    base->event.mouseenter = callback;
-    ui_event_register(base, MOUSEEVENT_ENTER, callback);
+    node->event.mouseenter = callback;
+    ui_event_register(node, MOUSEEVENT_ENTER, callback);
 }
 
-void UI_SetMouseleave(UI_Event *base, void *callback)
+void Node_SetMouseleave(Node *node, void *callback)
 {
-    if (!base || !checkUserdata(base))
+    if (!node || !checkUserdata(node))
         return;
-    base->event.mouseleave = callback;
-    ui_event_register(base, MOUSEEVENT_LEAVE, callback);
+    node->event.mouseleave = callback;
+    ui_event_register(node, MOUSEEVENT_LEAVE, callback);
 }
 
-void UI_SetClickWithUserdata(UI_Event *base, void *userdata, void *callback)
+void Node_SetClickWithUserdata(Node *node, void *userdata, void *callback)
 {
-    if (!base)
+    if (!node)
         return;
-    if (!base->event.userdata)
-        UI_SetUserdata(base, userdata);
+    if (!node->event.userdata)
+        Node_SetUserdata(node, userdata);
 
-    base->event.click = callback;
-    ui_event_register(base, MOUSEEVENT_CLICK, callback);
+    node->event.click = callback;
+    ui_event_register(node, MOUSEEVENT_CLICK, callback);
 }
 
-void UI_SetMultiEvent(UI_Event *base, void *userdata, Event_Userevent *arr, Uint8 count)
+void Node_SetMultiMouseEvent(Node *node, void *userdata, Event_Userevent *arr, Uint8 count)
 {
-    UI_SetUserdata(base, userdata);
-    base->event.userevent_count = count;
+    Node_SetUserdata(node, userdata);
+    node->event.userevent_count = count;
 
-    base->event.userevent_arr = NULL;
+    node->event.userevent_arr = NULL;
     for (int i = 0; i < count; i++) {
-        arrput(base->event.userevent_arr, arr[i]);
-        base->event.event_mask |= (1u << arr[i].type);
+        arrput(node->event.userevent_arr, arr[i]);
+        node->event.event_mask |= (1u << arr[i].type);
 
         switch (arr[i].type) {
         case MOUSEEVENT_DOWN:
-            base->event.mousedown = arr[i].fn;
+            node->event.mousedown = arr[i].fn;
             break;
         case MOUSEEVENT_UP:
-            base->event.mouseup = arr[i].fn;
+            node->event.mouseup = arr[i].fn;
             break;
         case MOUSEEVENT_ENTER:
-            base->event.mouseenter = arr[i].fn;
+            node->event.mouseenter = arr[i].fn;
             break;
         case MOUSEEVENT_LEAVE:
-            base->event.mouseleave = arr[i].fn;
+            node->event.mouseleave = arr[i].fn;
             break;
         case MOUSEEVENT_MOVE:
-            base->event.mousemove = arr[i].fn;
+            node->event.mousemove = arr[i].fn;
             break;
         case MOUSEEVENT_HOVER:
-            base->event.mousehover = arr[i].fn;
+            node->event.mousehover = arr[i].fn;
             break;
         case MOUSEEVENT_DOWN_RIGHT:
-            base->event.mousedown_right = arr[i].fn;
+            node->event.mousedown_right = arr[i].fn;
             break;
         case MOUSEEVENT_UP_RIGHT:
-            base->event.mouseup_right = arr[i].fn;
+            node->event.mouseup_right = arr[i].fn;
             break;
         case MOUSEEVENT_CLICK:
-            base->event.click = arr[i].fn;
+            node->event.click = arr[i].fn;
             break;
         case MOUSEEVENT_CLICK_RIGHT:
-            base->event.click_right = arr[i].fn;
+            node->event.click_right = arr[i].fn;
             break;
         case MOUSEEVENT_WHEEL:
-            base->event.wheel = arr[i].fn;
+            node->event.wheel = arr[i].fn;
             break;
         default:
             break;
@@ -324,7 +335,7 @@ void UI_SetMultiEvent(UI_Event *base, void *userdata, Event_Userevent *arr, Uint
 }
 
 /* 事件类型 → 分发函数 查表：枚举值即执行顺序（见 mouse_event.h），按下标一一对应 */
-static void (*const event_dispatch[])(SDL_Renderer *, SDL_Event *, UI_Event *) = {
+static void (*const event_dispatch[])(SDL_Renderer *, SDL_Event *, Node *) = {
     mouseenter,      /* MOUSEEVENT_ENTER */
     mousemove,       /* MOUSEEVENT_MOVE */
     mousehover,      /* MOUSEEVENT_HOVER */
@@ -338,15 +349,15 @@ static void (*const event_dispatch[])(SDL_Renderer *, SDL_Event *, UI_Event *) =
     mouseleave,      /* MOUSEEVENT_LEAVE */
 };
 
-void mouseevent(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base)
+void mouseevent(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
-    if (!renderer || !base || !event)
+    if (!renderer || !node || !event)
         return;
 
     /* 枚举顺序即执行顺序；event_mask 位掩码 O(1) 判断是否注册，
        查表数组按下标调用对应处理函数 */
     for (size_t i = 0; i < sizeof(event_dispatch) / sizeof(event_dispatch[0]); i++) {
-        if (base->event.event_mask & (1u << i))
-            event_dispatch[i](renderer, event, base);
+        if (node->event.event_mask & (1u << i))
+            event_dispatch[i](renderer, event, node);
     }
 }

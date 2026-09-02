@@ -10,8 +10,8 @@ UI_Text *UI_Text_Create(SDL_FRect rect, char *txt, char *path, float fontSize, U
         SDL_Log("UI_Text_Create: text is NULL\n");
         return NULL;
     }
-    text->base.rect = rect;
-    text->base.visible = true;
+    Node_Default((Node *)text, NODETYPE_TEXT);
+    text->node.rect = rect;
     text->color = FONT_COLOR_WHITE;
     text->font_size = fontSize;
     text->path = path;
@@ -30,44 +30,44 @@ UI_Text *UI_Text_Create(SDL_FRect rect, char *txt, char *path, float fontSize, U
 
     switch (textalign) {
     case TextAlign_TopCenter:
-        text->base.rect.x = rect.x + (rect.w - mw) / 2.0f;
+        text->node.rect.x = rect.x + (rect.w - mw) / 2.0f;
         break;
     case TextAlign_TopRight:
-        text->base.rect.x = rect.x + rect.w - mw;
+        text->node.rect.x = rect.x + rect.w - mw;
         break;
     case TextAlign_CenterLeft:
-        text->base.rect.y = rect.y + (rect.h - TTF_GetFontHeight(font)) / 2.0f;
+        text->node.rect.y = rect.y + (rect.h - TTF_GetFontHeight(font)) / 2.0f;
         break;
     case TextAlign_Center:
         if (rect.w == 0 || rect.h == 0) {
             SDL_Log("请初始化宽高");
             break;
         }
-        text->base.rect.x = rect.x + (rect.w - mw) / 2.0f;
-        text->base.rect.y = rect.y + (rect.h - TTF_GetFontHeight(font)) / 2.0f;
+        text->node.rect.x = rect.x + (rect.w - mw) / 2.0f;
+        text->node.rect.y = rect.y + (rect.h - TTF_GetFontHeight(font)) / 2.0f;
         break;
     case TextAlign_CenterRight:
-        text->base.rect.x = rect.x + rect.w - mw;
-        text->base.rect.y = rect.y + (rect.h - TTF_GetFontHeight(font)) / 2.0f;
+        text->node.rect.x = rect.x + rect.w - mw;
+        text->node.rect.y = rect.y + (rect.h - TTF_GetFontHeight(font)) / 2.0f;
         break;
     case TextAlign_BottomLeft:
-        text->base.rect.y = rect.y + rect.h - TTF_GetFontHeight(font);
+        text->node.rect.y = rect.y + rect.h - TTF_GetFontHeight(font);
         break;
     case TextAlign_BottomCenter:
-        text->base.rect.x = rect.x + (rect.w - mw) / 2.0f;
-        text->base.rect.y = rect.y + rect.h - TTF_GetFontHeight(font);
+        text->node.rect.x = rect.x + (rect.w - mw) / 2.0f;
+        text->node.rect.y = rect.y + rect.h - TTF_GetFontHeight(font);
         break;
     case TextAlign_BottomRight:
-        text->base.rect.x = rect.x + rect.w - mw;
-        text->base.rect.y = rect.y + rect.h - TTF_GetFontHeight(font);
+        text->node.rect.x = rect.x + rect.w - mw;
+        text->node.rect.y = rect.y + rect.h - TTF_GetFontHeight(font);
         break;
     case TextAlign_TopLeft:
     case TextAlign_None:
     default:
         break;
     }
-    text->base.rect.w = (float)mw;
-    text->base.rect.h = (float)TTF_GetFontHeight(font);
+    text->node.rect.w = (float)mw;
+    text->node.rect.h = (float)TTF_GetFontHeight(font);
 
     TTF_SetFontSize(font, saved_size);
 
@@ -79,7 +79,7 @@ UI_Text *UI_Text_Create(SDL_FRect rect, char *txt, char *path, float fontSize, U
 UI_Text *UI_Text_CreateWithClick(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, void *callback)
 {
     UI_Text *text = UI_Text_Create(rect, txt, path, fontSize, textalign);
-    UI_SetClickWithUserdata((UI_Event *)text, userdata, callback);
+    Node_SetClickWithUserdata((Node *)text, userdata, callback);
 
     return text;
 }
@@ -87,7 +87,7 @@ UI_Text *UI_Text_CreateWithClick(SDL_FRect rect, char *txt, char *path, float fo
 UI_Text *UI_Text_CreateWithMultiEvent(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, Event_Userevent arr[], int count)
 {
     UI_Text *text = UI_Text_Create(rect, txt, path, fontSize, textalign);
-    UI_SetMultiEvent((UI_Event *)text, userdata, arr, count);
+    Node_SetMultiMouseEvent((Node *)text, userdata, arr, count);
 
     return text;
 }
@@ -115,7 +115,10 @@ void UI_Text_Render(SDL_Renderer *renderer, UI_Text *text)
             SDL_DestroySurface(surf);
         }
     }
-    SDL_RenderTexture(renderer, text->texture, NULL, &text->base.rect);
+    /* texture 为懒创建，SetAplha 可能在创建前调用，渲染时每帧应用才可靠 */
+    if (text->texture)
+        SDL_SetTextureAlphaMod(text->texture, (Uint8)(text->node.alpha * 255));
+    SDL_RenderTexture(renderer, text->texture, NULL, &text->node.rect);
     TTF_SetFontSize(font, saved_size);
 }
 
@@ -123,20 +126,19 @@ void UI_Text_Deinit()
 {
     for (int i = 0; i < arrlen(text_arr); i++) {
         SDL_DestroyTexture(text_arr[i]->texture);
-        arrfree(text_arr[i]->base.event.userevent_arr); /* 释放 arrput 的动态数组 */
+        arrfree(text_arr[i]->node.event.userevent_arr); /* 释放 arrput 的动态数组 */
         SDL_free(text_arr[i]);                          /* 释放 SDL_calloc 分配的对象 */
     }
     arrfree(text_arr);
     text_arr = NULL;
 }
 
-void UI_Text_SetAplha(UI_Text *text, float alpha)
+void UI_Text_SetAlpha(UI_Text *text, float alpha)
 {
     if (!text)
         return;
 
-    text->base.alpha = SDL_clamp(alpha, 0.0f, 1.0f);
-    SDL_SetTextureAlphaMod(text->texture, (Uint8)(text->base.alpha * 255));
+    text->node.alpha = SDL_clamp(alpha, 0.0f, 1.0f);
 }
 
 void UI_Text_SetColor(UI_Text *text, char *color)

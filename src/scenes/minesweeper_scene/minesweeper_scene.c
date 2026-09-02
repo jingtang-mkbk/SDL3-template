@@ -366,7 +366,7 @@ static void init(AppState *state)
     initMine(state);
 
     // grid
-    d->grid = ui_base_create();
+    d->grid = Node_Create();
     // grid->rect = (SDL_FRect){ .x = 100, .y = 0, .w = 600, .h = 600 };
     // grid->event.click = grid_clicked;
     // grid->event.click_right = grid_rightclicked;
@@ -375,15 +375,15 @@ static void init(AppState *state)
     // grid->event.userdata = state;
     // grid->event.userevent_count = 0;
     // grid->event.userevent_arr = NULL;
-    UI_SetPosition(d->grid, 100, 0);
-    UI_SetSize(d->grid, 600, 600);
-    UI_SetMultiEvent(d->grid, state, (Event_Userevent[]){
-                                         { MOUSEEVENT_CLICK, grid_clicked },
-                                         { MOUSEEVENT_CLICK_RIGHT, grid_rightclicked },
-                                         { MOUSEEVENT_ENTER, grid_mouseenter },
-                                         { MOUSEEVENT_LEAVE, grid_mouseleave },
-                                     },
-                     4);
+    Node_SetPosition(d->grid, 100, 0);
+    Node_SetSize(d->grid, 600, 600);
+    Node_SetMultiMouseEvent(d->grid, state, (Event_Userevent[]){
+                                                { MOUSEEVENT_CLICK, grid_clicked },
+                                                { MOUSEEVENT_CLICK_RIGHT, grid_rightclicked },
+                                                { MOUSEEVENT_ENTER, grid_mouseenter },
+                                                { MOUSEEVENT_LEAVE, grid_mouseleave },
+                                            },
+                            4);
     // d->grid = grid;
 
     // Game Over 文字（居中显示，游戏结束才渲染）
@@ -411,9 +411,9 @@ static void event(AppState *state, SDL_Event *event)
         return;
     }
 
-    mouseevent(state->renderer, event, (UI_Event *)d->back_tex);
-    mouseevent(state->renderer, event, (UI_Event *)d->restart_tex);
-    mouseevent(state->renderer, event, (UI_Event *)d->grid);
+    mouseevent(state->renderer, event, (Node *)d->back_tex);
+    mouseevent(state->renderer, event, (Node *)d->restart_tex);
+    mouseevent(state->renderer, event, (Node *)d->grid);
 }
 
 static void iterate(AppState *state)

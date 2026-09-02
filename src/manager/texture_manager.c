@@ -41,9 +41,10 @@ static SDL_Texture *load(SDL_Renderer *renderer, const char *path)
     if (path == NULL)
         return NULL;
 
-    /* 如果已经加载过，跳过 */
-    if (shget(texture_map, path))
-        return NULL;
+    /* 如果已经加载过，直接返回缓存的贴图（场景切换时 UI_Deinit 只释放结构体、不销毁贴图） */
+    SDL_Texture *cached = shget(texture_map, path);
+    if (cached)
+        return cached;
 
     char full[100];
     SDL_snprintf(full, sizeof(full), "%s%s", ASSETS_PATH, path);
@@ -70,7 +71,7 @@ static void remove(const char *path)
 
 // 返回第一个精灵的 SDL_Texture*，后续精灵可以通过 get() 获取
 // key 约定与 UI_Sprite_Render 一致：path + 三位帧号（不带 assets/ 前缀、不带扩展名）
-static SDL_Texture *load_sprite(SDL_Renderer *renderer, const char *path, const Uint8 count)
+static SDL_Texture *load_sprite(SDL_Renderer *renderer, const char *path, const Uint8 count, const char *suffix)
 {
     if (path == NULL || count <= 0)
         return NULL;
@@ -79,12 +80,17 @@ static SDL_Texture *load_sprite(SDL_Renderer *renderer, const char *path, const 
     for (int i = 0; i < count; i++) {
         char key[100];
         SDL_snprintf(key, sizeof(key), "%s%03d", path, i);
-        if (shget(texture_map, key)) {
+
+        SDL_Texture *cached = shget(texture_map, key);
+        if (cached) {
+            if (i == 0) /* 首帧已缓存：直接复用，保证返回非 NULL */
+                first = cached;
             continue; // 如果已经加载过，跳过
         }
 
         char full[100];
-        SDL_snprintf(full, sizeof(full), "%s%s%03d%s", ASSETS_PATH, path, i, ".png");
+        const char *ext = suffix ? suffix : ".png"; /* 默认 png */
+        SDL_snprintf(full, sizeof(full), "%s%s%03d%s", ASSETS_PATH, path, i, ext);
         SDL_Texture *tex = IMG_LoadTexture(renderer, full);
         if (!tex) {
             SDL_Log("Failed to load sprite '%s': %s", full, SDL_GetError());
@@ -113,4 +119,5 @@ const TextureManager texture_manager = {
     .load = load,
     .remove = remove,
     .load_sprite = load_sprite,
+    .remove_sprite = remove_sprite,
 };

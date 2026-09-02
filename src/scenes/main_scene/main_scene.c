@@ -67,13 +67,20 @@ static void gomoku_clicked(SDL_Event *event, void *userdata)
     state->switch_scene(state, "gomoku_scene");
 }
 
+static void texture_remove()
+{
+    manager.get_managers()->texture_manager->remove("imgs/gs_tiger.svg");
+    manager.get_managers()->texture_manager->remove_sprite("sprites/SlimeGreen/SlimeBasic_00", 30);
+    manager.get_managers()->texture_manager->remove_sprite("sprites/SlimeOrange/SlimeOrange_00", 30);
+}
+
 static void init(AppState *state)
 {
     MainSceneData *d = (MainSceneData *)SDL_calloc(1, sizeof(MainSceneData));
     state->scene_data = d;
 
     d->MineSweeper = UI_Text_CreateWithClick((SDL_FRect){ 0, 0, 0, 0 }, "Mine Sweeper", NULL, 48, TextAlign_None, state, minesweeper_clicked);
-    /* 复合字面量直接作为参数传（UI_SetMultiEvent 内部会拷贝，临时对象仅需存活到调用结束） */
+    /* 复合字面量直接作为参数传（Node_SetMultiMouseEvent 内部会拷贝，临时对象仅需存活到调用结束） */
     d->Test = UI_Text_CreateWithMultiEvent(
         (SDL_FRect){ 0, 60, 0, 0 }, "Test", NULL, 48, TextAlign_None, state,
         (Event_Userevent[]){
@@ -91,16 +98,19 @@ static void init(AppState *state)
     d->Tiger = UI_Image_Create(state->renderer, "imgs/gs_tiger.svg", (SDL_FRect){ 100, 100, 200, 200 });
     d->SlimeGreen = UI_Sprite_Create(state->renderer, "sprites/SlimeGreen/SlimeBasic_00", (SDL_FRect){ 0, 100, 376, 256 }, 30, 1000);
     d->SlimeOrange = UI_Sprite_Create(state->renderer, "sprites/SlimeOrange/SlimeOrange_00", (SDL_FRect){ 0, 300, 510, 410 }, 30, 2000);
+    // UI_Sprite_SetAlpha(d->SlimeGreen, 0.5f);
+    UI_Sprite_SetAlpha(d->SlimeOrange, 0.5f);
+    UI_Text_SetAlpha(d->MineSweeper, 0.5f);
 
     /* 居中 */
     int pw, ph;
     SDL_GetCurrentRenderOutputSize(state->renderer, &pw, &ph);
-    d->MineSweeper->base.rect.x = (pw - d->MineSweeper->base.rect.w) / 2.0f;
-    d->Test->base.rect.x = (pw - d->Test->base.rect.w) / 2.0f;
-    d->Gomoku->base.rect.x = (pw - d->Gomoku->base.rect.w) / 2.0f;
+    d->MineSweeper->node.rect.x = (pw - d->MineSweeper->node.rect.w) / 2.0f;
+    d->Test->node.rect.x = (pw - d->Test->node.rect.w) / 2.0f;
+    d->Gomoku->node.rect.x = (pw - d->Gomoku->node.rect.w) / 2.0f;
 
-    // UI_SetClickWithUserdata((UI_Event *)d->Test, state, test_mousedown);
-    UI_SetClickWithUserdata((UI_Event *)d->Gomoku, state, gomoku_clicked);
+    // Node_SetClickWithUserdata((Node *)d->Test, state, test_mousedown);
+    Node_SetClickWithUserdata((Node *)d->Gomoku, state, gomoku_clicked);
 
     /* Start background music（play 未加载时会自动 load） */
     manager.get_managers()->music_manager->play("the_entertainer.ogg");
@@ -115,9 +125,9 @@ static void event(AppState *state, SDL_Event *event)
         return;
     }
 
-    mouseevent(state->renderer, event, (UI_Event *)d->MineSweeper);
-    mouseevent(state->renderer, event, (UI_Event *)d->Test);
-    mouseevent(state->renderer, event, (UI_Event *)d->Gomoku);
+    mouseevent(state->renderer, event, (Node *)d->MineSweeper);
+    mouseevent(state->renderer, event, (Node *)d->Test);
+    mouseevent(state->renderer, event, (Node *)d->Gomoku);
 }
 
 static void iterate(AppState *state)
@@ -142,6 +152,7 @@ static void deinit(AppState *state)
     UI_Image_Deinit();
     UI_Text_Deinit();
     UI_Sprite_Deinit();
+    texture_remove();
     SDL_free(state->scene_data);
     state->scene_data = NULL;
 }

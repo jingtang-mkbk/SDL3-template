@@ -22,7 +22,7 @@ typedef enum UI_TextAlign
 // clang-format on
 typedef struct UI_Text
 {
-    UI_Event base;
+    Node node;
     char *text;           // 文本内容
     char *path;           // 文本font
     SDL_Texture *texture; // 纹理
@@ -39,7 +39,7 @@ void UI_Text_Render(SDL_Renderer *renderer, UI_Text *text);
 // Deinit
 void UI_Text_Deinit(void);
 
-void UI_Text_SetAplha(UI_Text *text, float alpha);
+void UI_Text_SetAlpha(UI_Text *text, float alpha);
 void UI_Text_SetColor(UI_Text *text, char *color);
 
 #endif /* TEXT_H */

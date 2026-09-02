@@ -28,11 +28,18 @@ typedef enum MouseeventType
     MOUSEEVENT_LEAVE,       /* 离开 */
 } MouseeventType;
 
+typedef enum NodeType
+{
+    NODETYPE_IMAGE,  /* 图片 */
+    NODETYPE_TEXT,   /* 文本 */
+    NODETYPE_SPRITE, /* 精灵 */
+} NodeType;
+
 typedef void (*func_event)(SDL_Event *event, void *userdata);
 
 typedef struct Event_Userevent
 {
-    int type;
+    MouseeventType type;
     func_event fn;
 } Event_Userevent;
 
@@ -65,32 +72,38 @@ typedef struct MouseEvent
     Uint8 userevent_count;
 } MouseEvent;
 
-/* UI_Base：控件内嵌基类（几何 rect + 交互 event + 视觉属性） */
-typedef struct UI_Event
+typedef struct Node Node;
+/* Node：控件内嵌基类（几何 rect + 交互 event + 视觉属性） */
+typedef struct Node
 {
     MouseEvent event;
     SDL_FRect rect;
+    Uint8 z_index;     // 层级，越大越靠上
     bool visible;      // 是否显示
     float alpha;       // alpha通道
     double angle;      // 旋转角度
     SDL_FPoint anchor; // 锚点
-} UI_Event;
+    NodeType type;     // 节点类型
+    Node *children;
+} Node;
 
-UI_Event *ui_base_create(void);
+Node *Node_Create(void);
+void Node_Default(Node *node, NodeType type);
 
-void mouseevent(SDL_Renderer *renderer, SDL_Event *event, UI_Event *base);
+void mouseevent(SDL_Renderer *renderer, SDL_Event *event, Node *node);
 
-void UI_SetPosition(UI_Event *base, float x, float y);
-void UI_SetSize(UI_Event *base, float w, float h);
-void UI_SetAnchor(UI_Event *base, float offsetX, float offsetY);
-void UI_SetRotate(UI_Event *base, double deg);
-void UI_SetVisible(UI_Event *base, bool visible);
-void UI_SetUserdata(UI_Event *base, void *userdata);
-void UI_SetClick(UI_Event *base, void *callback);
-void UI_SetRightClick(UI_Event *base, void *callback);
-void UI_SetMouseenter(UI_Event *base, void *callback);
-void UI_SetMouseleave(UI_Event *base, void *callback);
-void UI_SetClickWithUserdata(UI_Event *base, void *userdata, void *callback);
-void UI_SetMultiEvent(UI_Event *base, void *userdata, Event_Userevent *arr, Uint8 count);
+void Node_SetPosition(Node *node, float x, float y);
+void Node_SetSize(Node *node, float w, float h);
+void Node_SetAnchor(Node *node, float offsetX, float offsetY);
+void Node_SetRotate(Node *node, double deg);
+void Node_SetVisible(Node *node, bool visible);
+
+void Node_SetUserdata(Node *node, void *userdata);
+void Node_SetClick(Node *node, void *callback);
+void Node_SetRightClick(Node *node, void *callback);
+void Node_SetMouseenter(Node *node, void *callback);
+void Node_SetMouseleave(Node *node, void *callback);
+void Node_SetClickWithUserdata(Node *node, void *userdata, void *callback);
+void Node_SetMultiMouseEvent(Node *node, void *userdata, Event_Userevent *arr, Uint8 count);
 
 #endif // EVENT_H
