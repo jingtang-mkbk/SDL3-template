@@ -30,17 +30,18 @@ typedef enum MouseeventType
 
 typedef enum NodeType
 {
-    NODETYPE_IMAGE,  /* 图片 */
-    NODETYPE_TEXT,   /* 文本 */
-    NODETYPE_SPRITE, /* 精灵 */
+    NODETYPE_CONTAINER, /* 容器：不绘制自身，仅用于挂载/分组 children */
+    NODETYPE_IMAGE,     /* 图片 */
+    NODETYPE_TEXT,      /* 文本 */
+    NODETYPE_SPRITE,    /* 精灵 */
 } NodeType;
 
-typedef void (*func_event)(SDL_Event *event, void *userdata);
+typedef void (*FuncEvent)(SDL_Event *event, void *userdata);
 
 typedef struct Event_Userevent
 {
     MouseeventType type;
-    func_event fn;
+    FuncEvent fn;
 } Event_Userevent;
 
 /*
@@ -51,22 +52,23 @@ typedef struct Event_Userevent
 
 typedef struct MouseEvent
 {
-    void (*mousedown)(SDL_Event *event, void *userdata);
-    void (*mouseup)(SDL_Event *event, void *userdata);
-    void (*mouseenter)(SDL_Event *event, void *userdata);
-    void (*mouseleave)(SDL_Event *event, void *userdata);
-    void (*mousemove)(SDL_Event *event, void *userdata);
-    void (*mousehover)(SDL_Event *event, void *userdata);
-    void (*mousedown_right)(SDL_Event *event, void *userdata);
-    void (*mouseup_right)(SDL_Event *event, void *userdata);
-    void (*click)(SDL_Event *event, void *userdata);
-    void (*click_right)(SDL_Event *event, void *userdata);
-    void (*wheel)(SDL_Event *event, void *userdata);
+    FuncEvent mousedown;
+    FuncEvent mouseup;
+    FuncEvent mouseenter;
+    FuncEvent mouseleave;
+    FuncEvent mousemove;
+    FuncEvent mousehover;
+    FuncEvent mousedown_right;
+    FuncEvent mouseup_right;
+    FuncEvent click;
+    FuncEvent click_right;
+    FuncEvent wheel;
     void *userdata;
     Uint32 event_mask;         // 已注册事件类型的位掩码（O(1) 判断，见 UI_SetMultiEvent）
     bool mouse_in_rect;        // 上次鼠标是否在矩形内（hover/leave 边沿检测）
     bool mousedown_flag;       // 是否按下了，用于click
     bool mousedown_right_flag; // 是否按下了，用于click_right
+    bool stop_propagation;     // 方案B：点按事件命中处理后，阻止继续向下层节点分发
     // 用户事件
     Event_Userevent *userevent_arr;
     Uint8 userevent_count;
@@ -76,21 +78,29 @@ typedef struct Node Node;
 /* Node：控件内嵌基类（几何 rect + 交互 event + 视觉属性） */
 typedef struct Node
 {
-    MouseEvent event;
-    SDL_FRect rect;
+    MouseEvent event;  // 鼠标事件
+    SDL_FRect rect;    // 渲染矩形
     Uint8 z_index;     // 层级，越大越靠上
     bool visible;      // 是否显示
     float alpha;       // alpha通道
     double angle;      // 旋转角度
     SDL_FPoint anchor; // 锚点
     NodeType type;     // 节点类型
-    Node *children;
+    Node *children;    // 子节点（第一个孩子）
+    Node *next;        // 同一父节点下的下一个兄弟
 } Node;
 
 Node *Node_Create(void);
 void Node_Default(Node *node, NodeType type);
+void Node_AddChild(Node *parent, Node *child);
 
 void mouseevent(SDL_Renderer *renderer, SDL_Event *event, Node *node);
+
+/* 构建/重建 root 的事件表（后序收集 + z 全局稳定排序）；树建好后在初始化调用一次即可 */
+void mouseevent_init(Node *root);
+
+/* 树形统一分发：按 (z_index 全局降序, 后序/后绘制优先) 命中并派发 root 的整棵子树 */
+void mouseevent_dispatch(SDL_Renderer *renderer, SDL_Event *event, Node *root);
 
 void Node_SetPosition(Node *node, float x, float y);
 void Node_SetSize(Node *node, float w, float h);
@@ -98,6 +108,7 @@ void Node_SetAnchor(Node *node, float offsetX, float offsetY);
 void Node_SetRotate(Node *node, double deg);
 void Node_SetVisible(Node *node, bool visible);
 
+void Node_SetStopPropagation(Node *node, bool stop_propagation);
 void Node_SetUserdata(Node *node, void *userdata);
 void Node_SetClick(Node *node, void *callback);
 void Node_SetRightClick(Node *node, void *callback);

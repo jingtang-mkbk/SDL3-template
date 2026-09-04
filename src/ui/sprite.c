@@ -1,8 +1,7 @@
 #include "sprite.h"
+#include "registry.h"
 
-static UI_Sprite **sprite_arr = NULL;
-
-UI_Sprite *UI_Sprite_Create(SDL_Renderer *renderer, const char *path, SDL_FRect rect, const Uint8 spriteCount, const Uint16 ms)
+static UI_Sprite *create(SDL_Renderer *renderer, const char *path, SDL_FRect rect, const Uint8 spriteCount, const Uint16 ms)
 {
     UI_Sprite *sprite = (UI_Sprite *)SDL_calloc(1, sizeof(UI_Sprite));
     Node_Default((Node *)sprite, NODETYPE_SPRITE);
@@ -22,27 +21,27 @@ UI_Sprite *UI_Sprite_Create(SDL_Renderer *renderer, const char *path, SDL_FRect 
     if (sprite->node.rect.w == 0 && sprite->node.rect.h == 0)
         SDL_GetTextureSize(tex, &sprite->node.rect.w, &sprite->node.rect.h);
     sprite->texture = tex;
-    arrput(sprite_arr, sprite); /* 注册，deinit 时统一 SDL_free */
+    ui_register((Node *)sprite); /* 登记到 ui 全局注册表，退出时由 ui.deinit 统一释放 */
     return sprite;
 }
 
-UI_Sprite *UI_Sprite_CreateWithClick(SDL_Renderer *renderer, const char *path, SDL_FRect rect, void *userdata, void *callback, const Uint8 spriteCount, const Uint16 ms)
+static UI_Sprite *createWithClick(SDL_Renderer *renderer, const char *path, SDL_FRect rect, void *userdata, void *callback, const Uint8 spriteCount, const Uint16 ms)
 {
-    UI_Sprite *sprite = UI_Sprite_Create(renderer, path, rect, spriteCount, ms);
+    UI_Sprite *sprite = create(renderer, path, rect, spriteCount, ms);
     Node_SetClickWithUserdata((Node *)sprite, userdata, callback);
 
     return sprite;
 }
 
-UI_Sprite *UI_Sprite_CreateWithMultiEvent(SDL_Renderer *renderer, const char *path, SDL_FRect rect, void *userdata, Event_Userevent arr[], const int count, const Uint8 spriteCount, const Uint16 ms)
+static UI_Sprite *createWithMultiEvent(SDL_Renderer *renderer, const char *path, SDL_FRect rect, void *userdata, Event_Userevent arr[], const int count, const Uint8 spriteCount, const Uint16 ms)
 {
-    UI_Sprite *sprite = UI_Sprite_Create(renderer, path, rect, spriteCount, ms);
+    UI_Sprite *sprite = create(renderer, path, rect, spriteCount, ms);
     Node_SetMultiMouseEvent((Node *)sprite, userdata, arr, count);
 
     return sprite;
 }
 
-void UI_Sprite_Render(SDL_Renderer *renderer, UI_Sprite *sprite)
+static void render(SDL_Renderer *renderer, UI_Sprite *sprite)
 {
     if (!sprite)
         return;
@@ -73,20 +72,27 @@ void UI_Sprite_Render(SDL_Renderer *renderer, UI_Sprite *sprite)
         SDL_RenderTexture(renderer, sprite->texture, NULL, &sprite->node.rect);
 }
 
-void UI_Sprite_Deinit()
+static void deinit(UI_Sprite *sprite)
 {
-    /* 释放 UI_Sprite_Create 中 SDL_calloc 分配的对象 */
-    for (int i = 0; i < arrlen(sprite_arr); i++) {
-        arrfree(sprite_arr[i]->node.event.userevent_arr);
-        SDL_free(sprite_arr[i]);
-    }
-    arrfree(sprite_arr);
-    sprite_arr = NULL;
+    if (!sprite)
+        return;
+
+    ui_unregister((Node *)sprite); /* 先从注册表移除，避免 ui.deinit 二次释放 */
+    SDL_free(sprite);
 }
 
-void UI_Sprite_SetAlpha(UI_Sprite *sprite, float alpha)
+static void setAlpha(UI_Sprite *sprite, float alpha)
 {
     if (!sprite)
         return;
     sprite->node.alpha = alpha;
 }
+
+const Sprite sprite = {
+    .create = create,
+    .createWithClick = createWithClick,
+    .createWithMultiEvent = createWithMultiEvent,
+    .render = render,
+    .deinit = deinit,
+    .setAlpha = setAlpha,
+};

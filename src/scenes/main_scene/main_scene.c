@@ -1,4 +1,5 @@
 #include "main_scene.h"
+#include "ui/ui.h"
 
 static void minesweeper_clicked(SDL_Event *event, void *userdata)
 {
@@ -67,21 +68,14 @@ static void gomoku_clicked(SDL_Event *event, void *userdata)
     state->switch_scene(state, "gomoku_scene");
 }
 
-static void texture_remove()
-{
-    manager.get_managers()->texture_manager->remove("imgs/gs_tiger.svg");
-    manager.get_managers()->texture_manager->remove_sprite("sprites/SlimeGreen/SlimeBasic_00", 30);
-    manager.get_managers()->texture_manager->remove_sprite("sprites/SlimeOrange/SlimeOrange_00", 30);
-}
-
 static void init(AppState *state)
 {
     MainSceneData *d = (MainSceneData *)SDL_calloc(1, sizeof(MainSceneData));
     state->scene_data = d;
 
-    d->MineSweeper = UI_Text_CreateWithClick((SDL_FRect){ 0, 0, 0, 0 }, "Mine Sweeper", NULL, 48, TextAlign_None, state, minesweeper_clicked);
+    d->MineSweeper = ui.getComps()->text->createWithClick((SDL_FRect){ 0, 0, 0, 0 }, "Mine Sweeper", NULL, 48, TextAlign_None, state, minesweeper_clicked);
     /* 复合字面量直接作为参数传（Node_SetMultiMouseEvent 内部会拷贝，临时对象仅需存活到调用结束） */
-    d->Test = UI_Text_CreateWithMultiEvent(
+    d->Test = ui.getComps()->text->createWithMultiEvent(
         (SDL_FRect){ 0, 60, 0, 0 }, "Test", NULL, 48, TextAlign_None, state,
         (Event_Userevent[]){
             { MOUSEEVENT_DOWN, mousedown },
@@ -94,13 +88,13 @@ static void init(AppState *state)
             { MOUSEEVENT_UP_RIGHT, mouseup_right },
         },
         8);
-    d->Gomoku = UI_Text_Create((SDL_FRect){ 0, 120, 0, 0 }, "Gomoku", NULL, 48, TextAlign_None);
-    d->Tiger = UI_Image_Create(state->renderer, "imgs/gs_tiger.svg", (SDL_FRect){ 100, 100, 200, 200 });
-    d->SlimeGreen = UI_Sprite_Create(state->renderer, "sprites/SlimeGreen/SlimeBasic_00", (SDL_FRect){ 0, 100, 376, 256 }, 30, 1000);
-    d->SlimeOrange = UI_Sprite_Create(state->renderer, "sprites/SlimeOrange/SlimeOrange_00", (SDL_FRect){ 0, 300, 510, 410 }, 30, 2000);
-    // UI_Sprite_SetAlpha(d->SlimeGreen, 0.5f);
-    UI_Sprite_SetAlpha(d->SlimeOrange, 0.5f);
-    UI_Text_SetAlpha(d->MineSweeper, 0.5f);
+    d->Gomoku = ui.getComps()->text->create((SDL_FRect){ 0, 120, 0, 0 }, "Gomoku", NULL, 48, TextAlign_None);
+    d->Tiger = ui.getComps()->image->create(state->renderer, "imgs/gs_tiger.svg", (SDL_FRect){ 100, 100, 200, 200 });
+    d->SlimeGreen = ui.getComps()->sprite->create(state->renderer, "sprites/SlimeGreen/SlimeBasic_00", (SDL_FRect){ 0, 100, 376, 256 }, 30, 1000);
+    d->SlimeOrange = ui.getComps()->sprite->create(state->renderer, "sprites/SlimeOrange/SlimeOrange_00", (SDL_FRect){ 0, 300, 510, 410 }, 30, 2000);
+    // ui.getComps()->sprite->setAlpha(d->SlimeGreen, 0.5f);
+    ui.getComps()->sprite->setAlpha(d->SlimeOrange, 0.5f);
+    ui.getComps()->text->setAlpha(d->MineSweeper, 0.5f);
 
     /* 居中 */
     int pw, ph;
@@ -111,6 +105,22 @@ static void init(AppState *state)
 
     // Node_SetClickWithUserdata((Node *)d->Test, state, test_mousedown);
     Node_SetClickWithUserdata((Node *)d->Gomoku, state, gomoku_clicked);
+
+    /* 建立控件树：root 为容器(0,0)。子节点 rect 现为屏幕坐标，作为相对 root 的偏移，视觉不变；
+       移动 root 即可整体平移子节点 */
+    d->root = Node_Create();
+    Node_Default(d->root, NODETYPE_CONTAINER);
+    d->root->rect = (SDL_FRect){ 0.0f, 0.0f, (float)pw, (float)ph };
+    /* 追加顺序即绘制顺序，后追加的叠在上面（与旧的手动渲染顺序一致） */
+    Node_AddChild(d->root, (Node *)d->Tiger);
+    Node_AddChild(d->root, (Node *)d->MineSweeper);
+    Node_AddChild(d->root, (Node *)d->Test);
+    Node_AddChild(d->root, (Node *)d->Gomoku);
+    Node_AddChild(d->root, (Node *)d->SlimeGreen);
+    Node_AddChild(d->root, (Node *)d->SlimeOrange);
+
+    /* 一次性构建事件表（收集+排序放在初始化，不在每次 event 里做） */
+    mouseevent_init(d->root);
 
     /* Start background music（play 未加载时会自动 load） */
     manager.get_managers()->music_manager->play("the_entertainer.ogg");
@@ -125,9 +135,8 @@ static void event(AppState *state, SDL_Event *event)
         return;
     }
 
-    mouseevent(state->renderer, event, (Node *)d->MineSweeper);
-    mouseevent(state->renderer, event, (Node *)d->Test);
-    mouseevent(state->renderer, event, (Node *)d->Gomoku);
+    /* 事件处理全部封装在 mouse_event（内部过滤鼠标事件类型），这里仅无条件转发给控件树 */
+    mouseevent_dispatch(state->renderer, event, d->root);
 }
 
 static void iterate(AppState *state)
@@ -136,23 +145,16 @@ static void iterate(AppState *state)
 
     SDL_SetRenderDrawColor(state->renderer, 50, 50, 50, 255);
     SDL_RenderClear(state->renderer);
-    UI_Image_Render(state->renderer, d->Tiger);
-    UI_Text_Render(state->renderer, d->MineSweeper);
-    UI_Text_Render(state->renderer, d->Test);
-    UI_Text_Render(state->renderer, d->Gomoku);
-    UI_Sprite_Render(state->renderer, d->SlimeGreen);
-    UI_Sprite_Render(state->renderer, d->SlimeOrange);
-    // Render_render(state->renderer, d->arr);
+    /* 递归渲染整棵控件树（子节点 rect 为相对父偏移，由 ui.render 累加） */
+    ui.render(state->renderer, d->root);
     SDL_RenderPresent(state->renderer);
 }
 
 static void deinit(AppState *state)
 {
     MainSceneData *d = SCENE_DATA(state, MainSceneData);
-    UI_Image_Deinit();
-    UI_Text_Deinit();
-    UI_Sprite_Deinit();
-    texture_remove();
+    /* 统一释放整棵控件树：注销注册表、销毁 text 贴图、移除 image/sprite 贴图缓存（切回自动重载） */
+    ui.release_root(d->root);
     SDL_free(state->scene_data);
     state->scene_data = NULL;
 }

@@ -1,4 +1,5 @@
 #include "gomoku_scene.h"
+#include "ui/ui.h"
 
 static int preWidth, preHeight;
 
@@ -12,11 +13,11 @@ static void init(AppState *state)
 
     // 背景
     d->background_img =
-        UI_Image_Create(state->renderer, "gomoku.png", (SDL_FRect){ 0, 0, 800, 800 });
+        ui.getComps()->image->create(state->renderer, "gomoku.png", (SDL_FRect){ 0, 0, 800, 800 });
 
     // 白子
     d->whiteArr =
-        UI_Image_Create(state->renderer, "white.png", (SDL_FRect){ 100, 100, 40, 40 });
+        ui.getComps()->image->create(state->renderer, "white.png", (SDL_FRect){ 100, 100, 40, 40 });
 
     // 黑子
 }
@@ -37,15 +38,15 @@ static void iterate(AppState *state)
 
     SDL_SetRenderDrawColor(state->renderer, 50, 50, 50, 255);
     SDL_RenderClear(state->renderer);
-    UI_Image_Render(state->renderer, d->background_img);
-    UI_Image_Render(state->renderer, d->whiteArr);
+    ui.getComps()->image->render(state->renderer, d->background_img);
+    ui.getComps()->image->render(state->renderer, d->whiteArr);
 
     SDL_RenderPresent(state->renderer);
 }
 
 static void deinit(AppState *state)
 {
-    UI_Image_Deinit();
+    /* 图片控件已登记到 ui 全局注册表，退出时由 ui.deinit 统一释放 */
     SDL_free(state->scene_data);
     state->scene_data = NULL;
     SDL_SetWindowSize(state->window, preWidth, preHeight);

@@ -30,16 +30,17 @@ typedef struct UI_Text
     SDL_Color color;      // 字体颜色
 } UI_Text;
 
-// Create
-UI_Text *UI_Text_Create(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign);
-UI_Text *UI_Text_CreateWithClick(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, void *callback);
-UI_Text *UI_Text_CreateWithMultiEvent(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, Event_Userevent arr[], int count);
-// Render
-void UI_Text_Render(SDL_Renderer *renderer, UI_Text *text);
-// Deinit
-void UI_Text_Deinit(void);
+typedef struct Text
+{
+    UI_Text *(*create)(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign);
+    UI_Text *(*createWithClick)(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, void *callback);
+    UI_Text *(*createWithMultiEvent)(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, Event_Userevent arr[], int count);
+    void (*render)(SDL_Renderer *renderer, UI_Text *text);
+    void (*deinit)(UI_Text *text);
+    void (*setAlpha)(UI_Text *text, float alpha);
+    void (*setColor)(UI_Text *text, char *color);
+} Text;
 
-void UI_Text_SetAlpha(UI_Text *text, float alpha);
-void UI_Text_SetColor(UI_Text *text, char *color);
+extern const Text text;
 
 #endif /* TEXT_H */

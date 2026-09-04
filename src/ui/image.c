@@ -1,8 +1,7 @@
 #include "image.h"
+#include "registry.h"
 
-static UI_Image **img_arr = NULL;
-
-UI_Image *UI_Image_Create(SDL_Renderer *renderer, char *path, SDL_FRect rect)
+static UI_Image *create(SDL_Renderer *renderer, char *path, SDL_FRect rect)
 {
     UI_Image *img = (UI_Image *)SDL_calloc(1, sizeof(UI_Image));
     Node_Default((Node *)img, NODETYPE_IMAGE);
@@ -20,27 +19,27 @@ UI_Image *UI_Image_Create(SDL_Renderer *renderer, char *path, SDL_FRect rect)
         SDL_GetTextureSize(tex, &img->node.rect.w, &img->node.rect.h);
     img->texture = tex;
 
-    arrput(img_arr, img); /* 注册，deinit 时统一 SDL_free */
+    ui_register((Node *)img); /* 登记到 ui 全局注册表，退出时由 ui.deinit 统一释放 */
     return img;
 }
 
-UI_Image *UI_Image_CreateWithClick(SDL_Renderer *renderer, char *path, SDL_FRect rect, void *userdata, void *callback)
+static UI_Image *createWithClick(SDL_Renderer *renderer, char *path, SDL_FRect rect, void *userdata, void *callback)
 {
-    UI_Image *img = UI_Image_Create(renderer, path, rect);
+    UI_Image *img = create(renderer, path, rect);
     Node_SetClickWithUserdata((Node *)img, userdata, callback);
 
     return img;
 }
 
-UI_Image *UI_Image_CreateWithMultiEvent(SDL_Renderer *renderer, char *path, SDL_FRect rect, void *userdata, Event_Userevent arr[], int count)
+static UI_Image *createWithMultiEvent(SDL_Renderer *renderer, char *path, SDL_FRect rect, void *userdata, Event_Userevent arr[], int count)
 {
-    UI_Image *img = UI_Image_Create(renderer, path, rect);
+    UI_Image *img = create(renderer, path, rect);
     Node_SetMultiMouseEvent((Node *)img, userdata, arr, count);
 
     return img;
 }
 
-void UI_Image_Render(SDL_Renderer *renderer, UI_Image *img)
+static void render(SDL_Renderer *renderer, UI_Image *img)
 {
     if (!img)
         return;
@@ -58,18 +57,16 @@ void UI_Image_Render(SDL_Renderer *renderer, UI_Image *img)
         SDL_RenderTexture(renderer, img->texture, NULL, &img->node.rect);
 }
 
-void UI_Image_Deinit()
+static void deinit(UI_Image *img)
 {
-    /* 释放 UI_Image_Create 中 SDL_calloc 分配的对象 */
-    for (int i = 0; i < arrlen(img_arr); i++) {
-        arrfree(img_arr[i]->node.event.userevent_arr); /* 释放 arrput 的动态数组 */
-        SDL_free(img_arr[i]);
-    }
-    arrfree(img_arr);
-    img_arr = NULL;
+    if (!img)
+        return;
+
+    ui_unregister((Node *)img); /* 先从注册表移除，避免 ui.deinit 二次释放 */
+    SDL_free(img);
 }
 
-void UI_Image_SetAlpha(UI_Image *img, float alpha)
+static void setAlpha(UI_Image *img, float alpha)
 {
     if (!img)
         return;
@@ -77,3 +74,12 @@ void UI_Image_SetAlpha(UI_Image *img, float alpha)
     img->node.alpha = SDL_clamp(alpha, 0.0f, 1.0f);
     SDL_SetTextureAlphaMod(img->texture, (Uint8)(alpha * 255));
 }
+
+const Image image = {
+    .create = create,
+    .createWithClick = createWithClick,
+    .createWithMultiEvent = createWithMultiEvent,
+    .render = render,
+    .deinit = deinit,
+    .setAlpha = setAlpha,
+};

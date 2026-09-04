@@ -6,6 +6,7 @@
 #include "scenes/gomoku_scene/gomoku_scene.h"
 #include "scenes/main_scene/main_scene.h"
 #include "scenes/minesweeper_scene/minesweeper_scene.h"
+#include "ui/ui.h"
 #include <SDL3/SDL_main.h>
 
 /* Scene switcher: call with scene name string to request a switch next frame */
@@ -42,6 +43,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
 
     manager.init(MANAGER_FLAG_FONT | MANAGER_FLAG_IMAGE | MANAGER_FLAG_MUSIC);
+    ui.init(); /* UI 组件表注册，场景通过 ui.getComps()->xxx 使用 */
 
     /* Build scene hash map: string name → Scene* */
     state->scene_map = NULL;
@@ -93,5 +95,6 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
         shfree(state->scene_map);
         SDL_free(state);
     }
+    ui.deinit(); /* 统一释放所有登记控件（先于 manager.deinit：贴图缓存由 manager 回收） */
     manager.deinit();
 }

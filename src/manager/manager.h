@@ -21,7 +21,7 @@ typedef struct Manager
 {
     void (*init)(Uint8 flags);
     void (*deinit)(void);
-    Managers *(*get_managers)(void);
+    const Managers *(*get_managers)(void);
 } Manager;
 
 extern const Manager manager;

@@ -1,8 +1,7 @@
 #include "text.h"
+#include "registry.h"
 
-static UI_Text **text_arr = NULL;
-
-UI_Text *UI_Text_Create(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign)
+static UI_Text *create(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign)
 {
     UI_Text *text = (UI_Text *)SDL_calloc(1, sizeof(UI_Text));
 
@@ -71,28 +70,27 @@ UI_Text *UI_Text_Create(SDL_FRect rect, char *txt, char *path, float fontSize, U
 
     TTF_SetFontSize(font, saved_size);
 
-    arrput(text_arr, text); /* 注册，deinit 时统一 SDL_free */
-
+    ui_register((Node *)text); /* 登记到 ui 全局注册表，退出时由 ui.deinit 统一释放 */
     return text;
 }
 
-UI_Text *UI_Text_CreateWithClick(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, void *callback)
+static UI_Text *createWithClick(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, void *callback)
 {
-    UI_Text *text = UI_Text_Create(rect, txt, path, fontSize, textalign);
+    UI_Text *text = create(rect, txt, path, fontSize, textalign);
     Node_SetClickWithUserdata((Node *)text, userdata, callback);
 
     return text;
 }
 
-UI_Text *UI_Text_CreateWithMultiEvent(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, Event_Userevent arr[], int count)
+static UI_Text *createWithMultiEvent(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, Event_Userevent arr[], int count)
 {
-    UI_Text *text = UI_Text_Create(rect, txt, path, fontSize, textalign);
+    UI_Text *text = create(rect, txt, path, fontSize, textalign);
     Node_SetMultiMouseEvent((Node *)text, userdata, arr, count);
 
     return text;
 }
 
-void UI_Text_Render(SDL_Renderer *renderer, UI_Text *text)
+static void render(SDL_Renderer *renderer, UI_Text *text)
 {
     if (!text || !text->text)
         return;
@@ -122,18 +120,17 @@ void UI_Text_Render(SDL_Renderer *renderer, UI_Text *text)
     TTF_SetFontSize(font, saved_size);
 }
 
-void UI_Text_Deinit()
+static void deinit(UI_Text *text)
 {
-    for (int i = 0; i < arrlen(text_arr); i++) {
-        SDL_DestroyTexture(text_arr[i]->texture);
-        arrfree(text_arr[i]->node.event.userevent_arr); /* 释放 arrput 的动态数组 */
-        SDL_free(text_arr[i]);                          /* 释放 SDL_calloc 分配的对象 */
-    }
-    arrfree(text_arr);
-    text_arr = NULL;
+    if (!text)
+        return;
+
+    ui_unregister((Node *)text); /* 先从注册表移除，避免 ui.deinit 二次释放 */
+    SDL_DestroyTexture(text->texture);
+    SDL_free(text);
 }
 
-void UI_Text_SetAlpha(UI_Text *text, float alpha)
+static void setAlpha(UI_Text *text, float alpha)
 {
     if (!text)
         return;
@@ -141,10 +138,20 @@ void UI_Text_SetAlpha(UI_Text *text, float alpha)
     text->node.alpha = SDL_clamp(alpha, 0.0f, 1.0f);
 }
 
-void UI_Text_SetColor(UI_Text *text, char *color)
+static void setColor(UI_Text *text, char *color)
 {
     if (!text)
         return;
 
     text->color = parse_color(color);
 }
+
+const Text text = {
+    .create = create,
+    .createWithClick = createWithClick,
+    .createWithMultiEvent = createWithMultiEvent,
+    .render = render,
+    .deinit = deinit,
+    .setAlpha = setAlpha,
+    .setColor = setColor,
+};

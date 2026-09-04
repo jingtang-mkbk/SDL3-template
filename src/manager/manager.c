@@ -1,16 +1,16 @@
 #include "manager.h"
 
-static Managers *managers_ctx = NULL;
-static Managers *get_managers(void)
+static Managers *context = NULL;
+static const Managers *get_managers(void)
 {
-    if (!managers_ctx) {
-        managers_ctx = (Managers *)SDL_calloc(1, sizeof(Managers));
-        if (!managers_ctx) {
+    if (!context) {
+        context = (Managers *)SDL_calloc(1, sizeof(Managers));
+        if (!context) {
             SDL_Log("Failed to allocate memory for Manager instance.");
             return NULL;
         }
     }
-    return managers_ctx;
+    return context;
 }
 
 static void init(Uint8 flags)
@@ -46,7 +46,7 @@ static void deinit()
         if (mgr->music_manager)
             mgr->music_manager->deinit();
         SDL_free(mgr);
-        managers_ctx = NULL;
+        context = NULL;
     }
 }
 

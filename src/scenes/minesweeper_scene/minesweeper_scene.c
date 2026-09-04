@@ -1,4 +1,5 @@
 #include "minesweeper_scene.h"
+#include "ui/ui.h"
 
 #define GRID_COLS 10
 
@@ -254,7 +255,7 @@ static SDL_Color mine_number_color(int n)
 /* 创建居中文本 */
 static UI_Text *make_text(const SDL_FRect *rect, const char *str, SDL_Color color)
 {
-    return UI_Text_Create(*rect, SDL_strdup(str), "MSYHBD.TTC", 40, TextAlign_Center);
+    return ui.getComps()->text->create(*rect, SDL_strdup(str), "MSYHBD.TTC", 40, TextAlign_Center);
 }
 
 static void free_text(UI_Text **t)
@@ -357,10 +358,10 @@ static void init(AppState *state)
     state->scene_data = d;
 
     // back
-    d->back_tex = UI_Text_CreateWithClick((SDL_FRect){ 5, 5, 0, 0 }, "Back", NULL, 24, TextAlign_None, state, back_clicked);
+    d->back_tex = ui.getComps()->text->createWithClick((SDL_FRect){ 5, 5, 0, 0 }, "Back", NULL, 24, TextAlign_None, state, back_clicked);
 
     // restart（Back 下方）
-    d->restart_tex = UI_Text_CreateWithClick((SDL_FRect){ 5, 40, 0, 0 }, "Restart", NULL, 24, TextAlign_None, state, restart_clicked);
+    d->restart_tex = ui.getComps()->text->createWithClick((SDL_FRect){ 5, 40, 0, 0 }, "Restart", NULL, 24, TextAlign_None, state, restart_clicked);
 
     // 初始化雷
     initMine(state);
@@ -389,12 +390,12 @@ static void init(AppState *state)
     // Game Over 文字（居中显示，游戏结束才渲染）
     int pw, ph;
     SDL_GetCurrentRenderOutputSize(state->renderer, &pw, &ph);
-    d->game_over_text = UI_Text_Create(
+    d->game_over_text = ui.getComps()->text->create(
         (SDL_FRect){ 0, 0, (float)pw, (float)ph }, SDL_strdup("Game Over"),
         "MSYHBD.TTC", 60, TextAlign_Center);
 
     // You Win 文字（居中显示，胜利才渲染）
-    d->win_text = UI_Text_Create(
+    d->win_text = ui.getComps()->text->create(
         (SDL_FRect){ 0, 0, (float)pw, (float)ph }, SDL_strdup("You Win"),
         "MSYHBD.TTC", 60, TextAlign_Center);
 
@@ -424,8 +425,8 @@ static void iterate(AppState *state)
     SDL_RenderClear(state->renderer);
 
     // Back / Restart
-    UI_Text_Render(state->renderer, d->back_tex);
-    UI_Text_Render(state->renderer, d->restart_tex);
+    ui.getComps()->text->render(state->renderer, d->back_tex);
+    ui.getComps()->text->render(state->renderer, d->restart_tex);
     // grid
     for (int i = 0; i < arrlen(d->cells); i++) {
         Cell *c = &d->cells[i];
@@ -438,14 +439,14 @@ static void iterate(AppState *state)
             SDL_SetRenderDrawColor(state->renderer, color.r, color.g, color.b, a);
             SDL_RenderFillRect(state->renderer, rect);
             if (c->text)
-                UI_Text_Render(state->renderer, c->text);
+                ui.getComps()->text->render(state->renderer, c->text);
         } else if (c->status == MineType_Flag) {
             Uint8 a = c->isHovered ? (Uint8)(color.a * c->opacity) : color.a;
             SDL_SetRenderDrawColor(state->renderer, color.r, color.g, color.b, a);
             SDL_RenderFillRect(state->renderer, rect);
             if (c->text)
-                UI_Text_Render(state->renderer, c->text); /* 显示 F */
-        } else                                            /* MineType_Hidden */
+                ui.getComps()->text->render(state->renderer, c->text); /* 显示 F */
+        } else                                                         /* MineType_Hidden */
         {
             Uint8 a = c->isHovered ? (Uint8)(color.a * c->opacity) : color.a;
             SDL_SetRenderDrawColor(state->renderer, color.r, color.g, color.b, a);
@@ -456,9 +457,9 @@ static void iterate(AppState *state)
 
     // 胜利 / 失败 居中显示
     if (d->win && d->win_text)
-        UI_Text_Render(state->renderer, d->win_text);
+        ui.getComps()->text->render(state->renderer, d->win_text);
     else if (d->game_over && d->game_over_text)
-        UI_Text_Render(state->renderer, d->game_over_text);
+        ui.getComps()->text->render(state->renderer, d->game_over_text);
 
     SDL_RenderPresent(state->renderer);
 }
@@ -467,7 +468,8 @@ static void deinit(AppState *state)
 {
     MinesweeperSceneData *d = SCENE_DATA(state, MinesweeperSceneData);
 
-    /* back/restart/win/game_over/cell 文本对象由 UI_Text_Deinit 统一释放 */
+    /* back/restart/win/game_over/cell 文本对象已登记到 ui 全局注册表，退出时由 ui.deinit 统一释放；
+       这里仅释放各场景自己 strdup 的字符串与裸 Node */
     for (int i = 0; i < arrlen(d->cells); i++)
         free_text(&d->cells[i].text);
     if (d->win_text)
@@ -476,7 +478,6 @@ static void deinit(AppState *state)
         SDL_free(d->game_over_text->text); /* strdup 的字符串 */
     SDL_free(d->grid);
     SDL_free(state->scene_data);
-    UI_Text_Deinit();
     state->scene_data = NULL;
 }
 
