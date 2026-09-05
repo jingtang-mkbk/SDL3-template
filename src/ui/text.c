@@ -1,5 +1,6 @@
 #include "text.h"
 #include "registry.h"
+#include "utils/utils.h"
 
 static UI_Text *create(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign)
 {
@@ -77,7 +78,7 @@ static UI_Text *create(SDL_FRect rect, char *txt, char *path, float fontSize, UI
 static UI_Text *createWithClick(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, void *callback)
 {
     UI_Text *text = create(rect, txt, path, fontSize, textalign);
-    Node_SetClickWithUserdata((Node *)text, userdata, callback);
+    mouseEvent.setClickWithUserdata((Node *)text, userdata, callback);
 
     return text;
 }
@@ -85,7 +86,7 @@ static UI_Text *createWithClick(SDL_FRect rect, char *txt, char *path, float fon
 static UI_Text *createWithMultiEvent(SDL_FRect rect, char *txt, char *path, float fontSize, UI_TextAlign textalign, void *userdata, Event_Userevent arr[], int count)
 {
     UI_Text *text = create(rect, txt, path, fontSize, textalign);
-    Node_SetMultiMouseEvent((Node *)text, userdata, arr, count);
+    mouseEvent.setMultiMouseEvent((Node *)text, userdata, arr, count);
 
     return text;
 }

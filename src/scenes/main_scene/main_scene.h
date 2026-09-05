@@ -2,6 +2,7 @@
 #define MAIN_SCENE_H
 
 #include "data.h"
+#include "event/events.h"
 #include "manager/manager.h"
 #include "ui/ui.h"
 

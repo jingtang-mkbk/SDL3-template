@@ -74,7 +74,7 @@ static void init(AppState *state)
     state->scene_data = d;
 
     d->MineSweeper = ui.getComps()->text->createWithClick((SDL_FRect){ 0, 0, 0, 0 }, "Mine Sweeper", NULL, 48, TextAlign_None, state, minesweeper_clicked);
-    /* 复合字面量直接作为参数传（Node_SetMultiMouseEvent 内部会拷贝，临时对象仅需存活到调用结束） */
+    /* 复合字面量直接作为参数传（mouseEvent.setMultiMouseEvent 内部会拷贝，临时对象仅需存活到调用结束） */
     d->Test = ui.getComps()->text->createWithMultiEvent(
         (SDL_FRect){ 0, 60, 0, 0 }, "Test", NULL, 48, TextAlign_None, state,
         (Event_Userevent[]){
@@ -90,11 +90,12 @@ static void init(AppState *state)
         8);
     d->Gomoku = ui.getComps()->text->create((SDL_FRect){ 0, 120, 0, 0 }, "Gomoku", NULL, 48, TextAlign_None);
     d->Tiger = ui.getComps()->image->create(state->renderer, "imgs/gs_tiger.svg", (SDL_FRect){ 100, 100, 200, 200 });
-    d->SlimeGreen = ui.getComps()->sprite->create(state->renderer, "sprites/SlimeGreen/SlimeBasic_00", (SDL_FRect){ 0, 100, 376, 256 }, 30, 1000);
+    d->SlimeGreen = ui.getComps()->sprite->create(state->renderer, "sprites/SlimeGreen/SlimeBasic_00", (SDL_FRect){ 0, 100, 376, 256 }, 30, 2000);
     d->SlimeOrange = ui.getComps()->sprite->create(state->renderer, "sprites/SlimeOrange/SlimeOrange_00", (SDL_FRect){ 0, 300, 510, 410 }, 30, 2000);
     // ui.getComps()->sprite->setAlpha(d->SlimeGreen, 0.5f);
     ui.getComps()->sprite->setAlpha(d->SlimeOrange, 0.5f);
     ui.getComps()->text->setAlpha(d->MineSweeper, 0.5f);
+    ui.getComps()->sprite->setTimeScale(d->SlimeGreen, 5.0f);
 
     /* 居中 */
     int pw, ph;
@@ -103,8 +104,8 @@ static void init(AppState *state)
     d->Test->node.rect.x = (pw - d->Test->node.rect.w) / 2.0f;
     d->Gomoku->node.rect.x = (pw - d->Gomoku->node.rect.w) / 2.0f;
 
-    // Node_SetClickWithUserdata((Node *)d->Test, state, test_mousedown);
-    Node_SetClickWithUserdata((Node *)d->Gomoku, state, gomoku_clicked);
+    // mouseEvent.setClickWithUserdata((Node *)d->Test, state, test_mousedown);
+    events.mouse->setClickWithUserdata((Node *)d->Gomoku, state, gomoku_clicked);
 
     /* 建立控件树：root 为容器(0,0)。子节点 rect 现为屏幕坐标，作为相对 root 的偏移，视觉不变；
        移动 root 即可整体平移子节点 */
@@ -120,7 +121,7 @@ static void init(AppState *state)
     Node_AddChild(d->root, (Node *)d->SlimeOrange);
 
     /* 一次性构建事件表（收集+排序放在初始化，不在每次 event 里做） */
-    mouseevent_init(d->root);
+    events.mouse->build(d->root);
 
     /* Start background music（play 未加载时会自动 load） */
     manager.get_managers()->music_manager->play("the_entertainer.ogg");
@@ -135,8 +136,8 @@ static void event(AppState *state, SDL_Event *event)
         return;
     }
 
-    /* 事件处理全部封装在 mouse_event（内部过滤鼠标事件类型），这里仅无条件转发给控件树 */
-    mouseevent_dispatch(state->renderer, event, d->root);
+    /* 事件处理封装在 mouse_event（内部过滤鼠标事件类型）；渲染走 ui，事件走 mouseEvent */
+    mouseEvent.dispatch(state->renderer, event, d->root);
 }
 
 static void iterate(AppState *state)

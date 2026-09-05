@@ -1,7 +1,7 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "event/mouse_event.h"
+#include "event/node.h"
 #include "manager/manager.h"
 
 typedef struct UI_Sprite
@@ -13,6 +13,7 @@ typedef struct UI_Sprite
     Uint16 ms;               // 每轮播放的毫秒数
     Uint8 index;             // 当前帧索引
     Uint64 last_update_time; // 上次更新时间
+    float time_scale;        // 时间缩放系数（1.0 = 正常，2.0 = 2倍速，0.5 = 半速）
 } UI_Sprite;
 
 typedef struct Sprite
@@ -23,6 +24,7 @@ typedef struct Sprite
     void (*render)(SDL_Renderer *renderer, UI_Sprite *sprite);
     void (*deinit)(UI_Sprite *sprite);
     void (*setAlpha)(UI_Sprite *sprite, float alpha);
+    void (*setTimeScale)(UI_Sprite *sprite, float time_scale);
 } Sprite;
 
 extern const Sprite sprite;

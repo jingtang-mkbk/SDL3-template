@@ -11,6 +11,7 @@ static UI_Sprite *create(SDL_Renderer *renderer, const char *path, SDL_FRect rec
     sprite->ms = ms;
     sprite->index = 0;
     sprite->last_update_time = 0;
+    sprite->time_scale = 1.0f;
     SDL_Texture *tex = manager.get_managers()->texture_manager->load_sprite(renderer, path, spriteCount, NULL);
     if (!tex) {
         SDL_Log("UI_Sprite_Create: image '%s' not loaded", sprite->path);
@@ -28,7 +29,7 @@ static UI_Sprite *create(SDL_Renderer *renderer, const char *path, SDL_FRect rec
 static UI_Sprite *createWithClick(SDL_Renderer *renderer, const char *path, SDL_FRect rect, void *userdata, void *callback, const Uint8 spriteCount, const Uint16 ms)
 {
     UI_Sprite *sprite = create(renderer, path, rect, spriteCount, ms);
-    Node_SetClickWithUserdata((Node *)sprite, userdata, callback);
+    mouseEvent.setClickWithUserdata((Node *)sprite, userdata, callback);
 
     return sprite;
 }
@@ -36,7 +37,7 @@ static UI_Sprite *createWithClick(SDL_Renderer *renderer, const char *path, SDL_
 static UI_Sprite *createWithMultiEvent(SDL_Renderer *renderer, const char *path, SDL_FRect rect, void *userdata, Event_Userevent arr[], const int count, const Uint8 spriteCount, const Uint16 ms)
 {
     UI_Sprite *sprite = create(renderer, path, rect, spriteCount, ms);
-    Node_SetMultiMouseEvent((Node *)sprite, userdata, arr, count);
+    mouseEvent.setMultiMouseEvent((Node *)sprite, userdata, arr, count);
 
     return sprite;
 }
@@ -48,7 +49,7 @@ static void render(SDL_Renderer *renderer, UI_Sprite *sprite)
     if (!sprite->texture)
         return;
 
-    Uint64 gap_time = sprite->ms / sprite->count;
+    Uint64 gap_time = sprite->ms / sprite->count / (sprite->time_scale > 0.0f ? sprite->time_scale : 1.0f);
     Uint64 current_time = SDL_GetTicks();
     if (current_time - sprite->last_update_time >= gap_time) {
         sprite->index = (sprite->index + 1) % sprite->count;
@@ -88,6 +89,13 @@ static void setAlpha(UI_Sprite *sprite, float alpha)
     sprite->node.alpha = alpha;
 }
 
+static void setTimeScale(UI_Sprite *sprite, float time_scale)
+{
+    if (sprite && sprite->time_scale > 0.0f) {
+        sprite->time_scale = time_scale;
+    }
+}
+
 const Sprite sprite = {
     .create = create,
     .createWithClick = createWithClick,
@@ -95,4 +103,5 @@ const Sprite sprite = {
     .render = render,
     .deinit = deinit,
     .setAlpha = setAlpha,
+    .setTimeScale = setTimeScale,
 };

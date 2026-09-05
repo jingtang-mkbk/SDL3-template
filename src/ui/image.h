@@ -1,7 +1,7 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
-#include "event/mouse_event.h"
+#include "event/node.h"
 #include "manager/manager.h"
 #include <SDL3_image/SDL_image.h>
 

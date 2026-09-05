@@ -3,6 +3,7 @@
 
 #include "cJSON.h"
 #include "data.h"
+#include "event/mouse_event.h"
 #include "manager/manager.h"
 #include "ui/text.h"
 #include "utils/utils.h"

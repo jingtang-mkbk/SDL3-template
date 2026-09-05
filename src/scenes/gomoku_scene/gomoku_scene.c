@@ -12,14 +12,13 @@ static void init(AppState *state)
     SDL_SetRenderDrawBlendMode(state->renderer, SDL_BLENDMODE_BLEND);
 
     // 背景
-    d->background_img =
-        ui.getComps()->image->create(state->renderer, "gomoku.png", (SDL_FRect){ 0, 0, 800, 800 });
+    d->background_img = ui.getComps()->image->create(state->renderer, "imgs/gomoku.png", (SDL_FRect){ 0, 0, 800, 800 });
 
     // 白子
-    d->whiteArr =
-        ui.getComps()->image->create(state->renderer, "white.png", (SDL_FRect){ 100, 100, 40, 40 });
+    d->whiteArr = ui.getComps()->image->create(state->renderer, "imgs/white.png", (SDL_FRect){ 100, 100, 40, 40 });
 
     // 黑子
+    d->blackArr = ui.getComps()->image->create(state->renderer, "imgs/black.png", (SDL_FRect){ 100, 100, 40, 40 });
 }
 
 static void event(AppState *state, SDL_Event *event)

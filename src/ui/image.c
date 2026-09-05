@@ -26,7 +26,7 @@ static UI_Image *create(SDL_Renderer *renderer, char *path, SDL_FRect rect)
 static UI_Image *createWithClick(SDL_Renderer *renderer, char *path, SDL_FRect rect, void *userdata, void *callback)
 {
     UI_Image *img = create(renderer, path, rect);
-    Node_SetClickWithUserdata((Node *)img, userdata, callback);
+    mouseEvent.setClickWithUserdata((Node *)img, userdata, callback);
 
     return img;
 }
@@ -34,7 +34,7 @@ static UI_Image *createWithClick(SDL_Renderer *renderer, char *path, SDL_FRect r
 static UI_Image *createWithMultiEvent(SDL_Renderer *renderer, char *path, SDL_FRect rect, void *userdata, Event_Userevent arr[], int count)
 {
     UI_Image *img = create(renderer, path, rect);
-    Node_SetMultiMouseEvent((Node *)img, userdata, arr, count);
+    mouseEvent.setMultiMouseEvent((Node *)img, userdata, arr, count);
 
     return img;
 }

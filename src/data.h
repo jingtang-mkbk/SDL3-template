@@ -41,16 +41,4 @@ typedef struct AppState
     void (*switch_scene)(AppState *, const char *);
 } AppState;
 
-/* id → 回调 映射表 */
-typedef struct
-{
-    void (*fn)(SDL_Event *, void *);
-    void *userdata;
-} ClickCB;
-typedef struct
-{
-    char *key;
-    ClickCB value;
-} ClickEntry;
-
 #endif // DATA_H

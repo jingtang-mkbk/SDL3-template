@@ -378,13 +378,13 @@ static void init(AppState *state)
     // grid->event.userevent_arr = NULL;
     Node_SetPosition(d->grid, 100, 0);
     Node_SetSize(d->grid, 600, 600);
-    Node_SetMultiMouseEvent(d->grid, state, (Event_Userevent[]){
-                                                { MOUSEEVENT_CLICK, grid_clicked },
-                                                { MOUSEEVENT_CLICK_RIGHT, grid_rightclicked },
-                                                { MOUSEEVENT_ENTER, grid_mouseenter },
-                                                { MOUSEEVENT_LEAVE, grid_mouseleave },
-                                            },
-                            4);
+    mouseEvent.setMultiMouseEvent(d->grid, state, (Event_Userevent[]){
+                                                      { MOUSEEVENT_CLICK, grid_clicked },
+                                                      { MOUSEEVENT_CLICK_RIGHT, grid_rightclicked },
+                                                      { MOUSEEVENT_ENTER, grid_mouseenter },
+                                                      { MOUSEEVENT_LEAVE, grid_mouseleave },
+                                                  },
+                                  4);
     // d->grid = grid;
 
     // Game Over 文字（居中显示，游戏结束才渲染）
@@ -412,9 +412,9 @@ static void event(AppState *state, SDL_Event *event)
         return;
     }
 
-    mouseevent(state->renderer, event, (Node *)d->back_tex);
-    mouseevent(state->renderer, event, (Node *)d->restart_tex);
-    mouseevent(state->renderer, event, (Node *)d->grid);
+    mouseEvent.handle(state->renderer, event, (Node *)d->back_tex);
+    mouseEvent.handle(state->renderer, event, (Node *)d->restart_tex);
+    mouseEvent.handle(state->renderer, event, (Node *)d->grid);
 }
 
 static void iterate(AppState *state)

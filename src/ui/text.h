@@ -1,7 +1,8 @@
 #ifndef TEXT_H
 #define TEXT_H
 
-#include "event/mouse_event.h"
+#include "data.h"
+#include "event/node.h"
 #include "manager/manager.h"
 #include <SDL3_ttf/SDL_ttf.h>
 

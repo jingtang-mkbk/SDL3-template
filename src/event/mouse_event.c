@@ -1,10 +1,12 @@
 #include "mouse_event.h"
+#include "node.h"
+#include "utils/utils.h"
+#include <stdbool.h>
 
-/* —— 树形事件分发（mouseevent_dispatch）状态 —— */
-static Node **s_event_nodes = NULL; /* 事件表：后序(子先于父)+兄弟逆序 = 绘制逆序，下标小者最上层 */
-static Node *s_hover_focus = NULL;  /* 当前悬停的最上层节点 */
-static Node *s_last_root = NULL;    /* 上次构建事件表的 root */
-static bool s_dirty = false;        /* 树结构/可见性变化后置位，下次 dispatch 前重建事件表 */
+/* —— 树形统一分发（MouseEvent_Build / MouseEvent_Dispatch）状态 —— */
+static Node **s_dispatch_nodes = NULL; /* 事件表：后序(子先于父)+兄弟逆序 = 绘制逆序，前部最上层 */
+static Node *s_hover_focus = NULL;     /* 当前悬停的最上层节点 */
+static Node *s_last_root = NULL;       /* 上次构建事件表的 root */
 
 static bool check_in_rect(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
@@ -162,88 +164,9 @@ static bool checkUserdata(Node *node)
         return true;
 }
 
-Node *Node_Create(void)
-{
-    return (Node *)SDL_calloc(1, sizeof(Node));
-}
-
-void Node_Default(Node *node, NodeType type)
-{
-    node->type = type;
-    node->alpha = 1.0f;
-    node->anchor = (SDL_FPoint){ 0.0f, 0.0f };
-    node->angle = 0.0f;
-    node->children = NULL;
-    node->next = NULL;
-    node->visible = true;
-    node->z_index = 0;
-}
-
-/* 把 child 追加到 parent 的孩子链表尾部（保持插入顺序） */
-void Node_AddChild(Node *parent, Node *child)
-{
-    if (!parent || !child)
-        return;
-
-    if (!parent->children) {
-        parent->children = child;
-        return;
-    }
-    Node *tail = parent->children;
-    while (tail->next)
-        tail = tail->next;
-    tail->next = child;
-
-    s_dirty = true; /* 树结构变化：事件表下次重建 */
-}
-
-void Node_SetPosition(Node *node, float x, float y)
-{
-    if (!node)
-        return;
-
-    node->rect.x = x;
-    node->rect.y = y;
-}
-
-void Node_SetSize(Node *node, float w, float h)
-{
-    if (!node)
-        return;
-
-    node->rect.w = w;
-    node->rect.h = h;
-}
-
-void Node_SetAnchor(Node *node, float offsetX, float offsetY)
-{
-    if (!node)
-        return;
-
-    node->anchor.x = node->rect.x + offsetX;
-    node->anchor.y = node->rect.y + offsetY;
-}
-
-void Node_SetRotate(Node *node, double deg)
-{
-    if (!node)
-        return;
-
-    node->angle = deg;
-}
-
-void Node_SetVisible(Node *node, bool visible)
-{
-    if (!node)
-        return;
-
-    if (node->visible != visible) {
-        node->visible = visible;
-        s_dirty = true; /* 事件表只收录可见节点，可见性变化需重建 */
-    }
-}
-
-void Node_SetStopPropagation(Node *node, bool stop_propagation)
+/* Node 的创建/默认/树与几何操作已移入 node.c（见 node.h）；
+   此处仅保留事件相关逻辑 */
+static void MouseEvent_SetStopPropagation(Node *node, bool stop_propagation)
 {
     if (!node)
         return;
@@ -251,7 +174,7 @@ void Node_SetStopPropagation(Node *node, bool stop_propagation)
     node->event.stop_propagation = stop_propagation;
 }
 
-void Node_SetUserdata(Node *node, void *userdata)
+static void MouseEvent_SetUserdata(Node *node, void *userdata)
 {
     if (!node)
         return;
@@ -262,8 +185,8 @@ void Node_SetUserdata(Node *node, void *userdata)
     node->event.mousedown_right_flag = false;
 }
 
-/* 把某个事件类型注册进 userevent_arr（供 mouseevent() 分发）；已存在则更新回调 */
-static void ui_event_register(Node *node, MouseeventType type, void *fn)
+/* 把某个事件类型注册进 userevent_arr（供 MouseEvent_Handle 分发）；已存在则更新回调 */
+static void event_register(Node *node, MouseeventType type, void *fn)
 {
     for (int i = 0; i < arrlen(node->event.userevent_arr); i++) {
         if (node->event.userevent_arr[i].type == type) {
@@ -277,52 +200,52 @@ static void ui_event_register(Node *node, MouseeventType type, void *fn)
     node->event.event_mask |= (1u << type);
 }
 
-void Node_SetClick(Node *node, void *callback)
+static void MouseEvent_SetClick(Node *node, void *callback)
 {
     if (!node || !checkUserdata(node))
         return;
     node->event.click = callback;
-    ui_event_register(node, MOUSEEVENT_CLICK, callback);
+    event_register(node, MOUSEEVENT_CLICK, callback);
 }
 
-void Node_SetRightClick(Node *node, void *callback)
+static void MouseEvent_SetRightClick(Node *node, void *callback)
 {
     if (!node || !checkUserdata(node))
         return;
     node->event.click_right = callback;
-    ui_event_register(node, MOUSEEVENT_CLICK_RIGHT, callback);
+    event_register(node, MOUSEEVENT_CLICK_RIGHT, callback);
 }
 
-void Node_SetMouseenter(Node *node, void *callback)
+static void MouseEvent_SetMouseenter(Node *node, void *callback)
 {
     if (!node || !checkUserdata(node))
         return;
     node->event.mouseenter = callback;
-    ui_event_register(node, MOUSEEVENT_ENTER, callback);
+    event_register(node, MOUSEEVENT_ENTER, callback);
 }
 
-void Node_SetMouseleave(Node *node, void *callback)
+static void MouseEvent_SetMouseleave(Node *node, void *callback)
 {
     if (!node || !checkUserdata(node))
         return;
     node->event.mouseleave = callback;
-    ui_event_register(node, MOUSEEVENT_LEAVE, callback);
+    event_register(node, MOUSEEVENT_LEAVE, callback);
 }
 
-void Node_SetClickWithUserdata(Node *node, void *userdata, void *callback)
+static void MouseEvent_SetClickWithUserdata(Node *node, void *userdata, void *callback)
 {
     if (!node)
         return;
     if (!node->event.userdata)
-        Node_SetUserdata(node, userdata);
+        MouseEvent_SetUserdata(node, userdata);
 
     node->event.click = callback;
-    ui_event_register(node, MOUSEEVENT_CLICK, callback);
+    event_register(node, MOUSEEVENT_CLICK, callback);
 }
 
-void Node_SetMultiMouseEvent(Node *node, void *userdata, Event_Userevent *arr, Uint8 count)
+static void MouseEvent_SetMultiMouseEvent(Node *node, void *userdata, Event_Userevent *arr, Uint8 count)
 {
-    Node_SetUserdata(node, userdata);
+    MouseEvent_SetUserdata(node, userdata);
     node->event.userevent_count = count;
 
     node->event.userevent_arr = NULL;
@@ -385,7 +308,7 @@ static void (*const event_dispatch[])(SDL_Renderer *, SDL_Event *, Node *) = {
     mouseleave,      /* MOUSEEVENT_LEAVE */
 };
 
-void mouseevent(SDL_Renderer *renderer, SDL_Event *event, Node *node)
+static void MouseEvent_Handle(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (!renderer || !node || !event)
         return;
@@ -404,7 +327,7 @@ static bool node_has_events(Node *node)
     return node->event.event_mask != 0;
 }
 
-/* 后序遍历收集：children 全部先于自身（子先于父）；兄弟按 next 逆序（后 append=后绘制=优先级高） */
+/* 后序收集：children 全先于自身（子先于父）；兄弟按 next 逆序（后 append=后绘制=优先级高） */
 static void collect_event_nodes(Node *node)
 {
     if (!node)
@@ -418,49 +341,21 @@ static void collect_event_nodes(Node *node)
     arrfree(kids);
 
     if (node->visible && node_has_events(node))
-        arrput(s_event_nodes, node);
+        arrput(s_dispatch_nodes, node);
 }
 
 /* 稳定插入排序：z_index 降序（越大越先）；z 相同保持原序（保住“后绘制先触发”） */
 static void sort_event_nodes(void)
 {
-    for (int i = 1; i < arrlen(s_event_nodes); i++) {
-        Node *node = s_event_nodes[i];
+    for (int i = 1; i < arrlen(s_dispatch_nodes); i++) {
+        Node *node = s_dispatch_nodes[i];
         int j = i - 1;
-        while (j >= 0 && s_event_nodes[j]->z_index < node->z_index) {
-            s_event_nodes[j + 1] = s_event_nodes[j];
+        while (j >= 0 && s_dispatch_nodes[j]->z_index < node->z_index) {
+            s_dispatch_nodes[j + 1] = s_dispatch_nodes[j];
             j--;
         }
-        s_event_nodes[j + 1] = node;
+        s_dispatch_nodes[j + 1] = node;
     }
-}
-
-/* 求 node 在以 root 为根的树中的世界坐标（沿祖先链累加 rect.x/y 偏移） */
-static bool find_world_rect(Node *n, Node *target, float ox, float oy, SDL_FRect *out)
-{
-    if (!n)
-        return false;
-
-    float x = n->rect.x + ox;
-    float y = n->rect.y + oy;
-    if (n == target) {
-        out->x = x;
-        out->y = y;
-        out->w = n->rect.w;
-        out->h = n->rect.h;
-        return true;
-    }
-    for (Node *c = n->children; c; c = c->next)
-        if (find_world_rect(c, target, x, y, out))
-            return true;
-    return false;
-}
-
-static SDL_FRect node_world_rect(Node *root, Node *node)
-{
-    SDL_FRect w = { 0.0f, 0.0f, 0.0f, 0.0f };
-    find_world_rect(root, node, 0.0f, 0.0f, &w);
-    return w;
 }
 
 /* 命中检测（坐标统一换算到 render 坐标系） */
@@ -475,27 +370,31 @@ static bool hit_node(SDL_Renderer *renderer, SDL_Event *event, const SDL_FRect *
 /* 命中最上层节点（事件表下标小者即最上层） */
 static Node *topmost_hit(SDL_Renderer *renderer, SDL_Event *event, Node *root)
 {
-    for (int i = 0; i < arrlen(s_event_nodes); i++) {
-        SDL_FRect wr = node_world_rect(root, s_event_nodes[i]);
+    for (int i = 0; i < arrlen(s_dispatch_nodes); i++) {
+        SDL_FRect wr;
+        if (!Node_GetWorldRect(root, s_dispatch_nodes[i], &wr))
+            continue;
         if (hit_node(renderer, event, &wr))
-            return s_event_nodes[i];
+            return s_dispatch_nodes[i];
     }
     return NULL;
 }
 
-/* 把世界坐标临时写入 node->rect，调用现有单节点分发再还原（复用 enter/leave/click 等逻辑） */
+/* 把世界坐标临时写入 node->rect，调用单节点 MouseEvent_Handle 再还原（复用 enter/leave/click 等逻辑） */
 static void fire_node(SDL_Renderer *renderer, SDL_Event *event, Node *root, Node *node)
 {
-    SDL_FRect wr = node_world_rect(root, node);
+    SDL_FRect wr;
+    if (!Node_GetWorldRect(root, node, &wr))
+        return;
+
     SDL_FRect saved = node->rect;
     node->rect = wr;
-    mouseevent(renderer, event, node);
+    MouseEvent_Handle(renderer, event, node);
     node->rect = saved;
 }
 
-/* 构建/重建 root 的事件表：清空 → 后序收集 → z 稳定排序。
-   树初始化后调用一次即可；root 变化或 Node_AddChild / Node_SetVisible 后会自动重建 */
-void mouseevent_init(Node *root)
+/* 构建/重建 root 的事件表：清空 → 后序收集 → z 稳定排序（初始化/改树后调用一次） */
+static void MouseEvent_Build(Node *root)
 {
     if (!root)
         return;
@@ -504,19 +403,19 @@ void mouseevent_init(Node *root)
         s_hover_focus = NULL; /* 换了场景根，丢弃旧悬停焦点，避免指向已释放节点 */
     s_last_root = root;
 
-    arrfree(s_event_nodes);
-    s_event_nodes = NULL;
+    arrfree(s_dispatch_nodes);
+    s_dispatch_nodes = NULL;
     collect_event_nodes(root);
     sort_event_nodes();
 }
 
-/* 统一分发入口：场景 event() 每帧对其 root 调用一次 */
-void mouseevent_dispatch(SDL_Renderer *renderer, SDL_Event *event, Node *root)
+/* 统一分发入口：场景 event() 每帧对其 root 调用一次（内部过滤鼠标事件类型） */
+static void MouseEvent_Dispatch(SDL_Renderer *renderer, SDL_Event *event, Node *root)
 {
     if (!renderer || !event || !root)
         return;
 
-    /* 只处理鼠标类事件：其余（键盘/退出等）一律忽略；场景只需把每个事件都转交给这里 */
+    /* 只处理鼠标类事件：其余（键盘/退出等）一律忽略 */
     switch (event->type) {
     case SDL_EVENT_MOUSE_MOTION:
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
@@ -527,12 +426,9 @@ void mouseevent_dispatch(SDL_Renderer *renderer, SDL_Event *event, Node *root)
         return;
     }
 
-    /* 事件表在 mouseevent_build（初始化）构建；这里只在 root 变化或树脏（增删子/可见性变更）时重建，
-       避免每次鼠标事件都遍历整棵树 */
-    if (root != s_last_root || s_dirty) {
-        s_dirty = false;
-        mouseevent_init(root);
-    }
+    /* root 变化（切场景）时自动重建；同 root 内的增删子/可见性变更请调用方再 MouseEvent_Build 一次 */
+    if (root != s_last_root)
+        MouseEvent_Build(root);
 
     /* 指针类（move/hover/enter/leave/wheel）：只发给命中的最上层节点，不向下传递 */
     if (event->type == SDL_EVENT_MOUSE_MOTION) {
@@ -557,9 +453,11 @@ void mouseevent_dispatch(SDL_Renderer *renderer, SDL_Event *event, Node *root)
     }
 
     /* 点按类（DOWN/UP/CLICK 及右键…）：从最上层向下分发，命中即处理；stop_propagation=true 时停止向下 */
-    for (int i = 0; i < arrlen(s_event_nodes); i++) {
-        Node *n = s_event_nodes[i];
-        SDL_FRect wr = node_world_rect(root, n);
+    for (int i = 0; i < arrlen(s_dispatch_nodes); i++) {
+        Node *n = s_dispatch_nodes[i];
+        SDL_FRect wr;
+        if (!Node_GetWorldRect(root, n, &wr))
+            continue;
         if (!hit_node(renderer, event, &wr))
             continue;
         fire_node(renderer, event, root, n);
@@ -567,3 +465,17 @@ void mouseevent_dispatch(SDL_Renderer *renderer, SDL_Event *event, Node *root)
             break;
     }
 }
+
+const MouseEventApi mouseEvent = {
+    .handle = MouseEvent_Handle,
+    .build = MouseEvent_Build,
+    .dispatch = MouseEvent_Dispatch,
+    .setUserdata = MouseEvent_SetUserdata,
+    .setClick = MouseEvent_SetClick,
+    .setRightClick = MouseEvent_SetRightClick,
+    .setMouseenter = MouseEvent_SetMouseenter,
+    .setMouseleave = MouseEvent_SetMouseleave,
+    .setClickWithUserdata = MouseEvent_SetClickWithUserdata,
+    .setMultiMouseEvent = MouseEvent_SetMultiMouseEvent,
+    .setStopPropagation = MouseEvent_SetStopPropagation,
+};

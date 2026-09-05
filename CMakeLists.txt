@@ -38,7 +38,10 @@ add_executable(main WIN32
     src/manager/font_manager.c
     src/manager/texture_manager.c
     src/manager/music_manager.c
+    src/event/events.c
+    src/event/keyboard_event.c
     src/event/mouse_event.c
+    src/event/node.c
     src/ui/ui.c
     src/ui/text.c
     src/ui/image.c
