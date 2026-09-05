@@ -15,12 +15,12 @@ typedef struct MusicEntry
 static MusicEntry *music_map = NULL; /* string → {audio, track} hash table */
 static MIX_Mixer *mixer = NULL;
 
-static bool music_manager_init()
+static bool init()
 {
     return MIX_Init();
 }
 
-static void music_manager_deinit()
+static void deinit()
 {
     for (int i = 0; i < shlen(music_map); i++) {
         if (music_map[i].value.track)
@@ -104,7 +104,7 @@ static void music_manager_play(const char *filepath)
     SDL_DestroyProperties(props);
 }
 
-static void music_manager_pause(const char *filepath)
+static void pause(const char *filepath)
 {
     if (!filepath)
         return;
@@ -114,8 +114,8 @@ static void music_manager_pause(const char *filepath)
 }
 
 const MusicManager music_manager = {
-    .init = music_manager_init,
-    .deinit = music_manager_deinit,
+    .init = init,
+    .deinit = deinit,
     .play = music_manager_play,
-    .pause = music_manager_pause,
+    .pause = pause,
 };

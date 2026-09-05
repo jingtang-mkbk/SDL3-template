@@ -166,7 +166,7 @@ static bool checkUserdata(Node *node)
 
 /* Node 的创建/默认/树与几何操作已移入 node.c（见 node.h）；
    此处仅保留事件相关逻辑 */
-static void MouseEvent_SetStopPropagation(Node *node, bool stop_propagation)
+static void setStopPropagation(Node *node, bool stop_propagation)
 {
     if (!node)
         return;
@@ -174,7 +174,7 @@ static void MouseEvent_SetStopPropagation(Node *node, bool stop_propagation)
     node->event.stop_propagation = stop_propagation;
 }
 
-static void MouseEvent_SetUserdata(Node *node, void *userdata)
+static void setUserdata(Node *node, void *userdata)
 {
     if (!node)
         return;
@@ -185,7 +185,7 @@ static void MouseEvent_SetUserdata(Node *node, void *userdata)
     node->event.mousedown_right_flag = false;
 }
 
-/* 把某个事件类型注册进 userevent_arr（供 MouseEvent_Handle 分发）；已存在则更新回调 */
+/* 把某个事件类型注册进 userevent_arr（供 handle 分发）；已存在则更新回调 */
 static void event_register(Node *node, MouseeventType type, void *fn)
 {
     for (int i = 0; i < arrlen(node->event.userevent_arr); i++) {
@@ -200,7 +200,7 @@ static void event_register(Node *node, MouseeventType type, void *fn)
     node->event.event_mask |= (1u << type);
 }
 
-static void MouseEvent_SetClick(Node *node, void *callback)
+static void setClick(Node *node, void *callback)
 {
     if (!node || !checkUserdata(node))
         return;
@@ -208,7 +208,7 @@ static void MouseEvent_SetClick(Node *node, void *callback)
     event_register(node, MOUSEEVENT_CLICK, callback);
 }
 
-static void MouseEvent_SetRightClick(Node *node, void *callback)
+static void setRightClick(Node *node, void *callback)
 {
     if (!node || !checkUserdata(node))
         return;
@@ -216,7 +216,7 @@ static void MouseEvent_SetRightClick(Node *node, void *callback)
     event_register(node, MOUSEEVENT_CLICK_RIGHT, callback);
 }
 
-static void MouseEvent_SetMouseenter(Node *node, void *callback)
+static void setMouseenter(Node *node, void *callback)
 {
     if (!node || !checkUserdata(node))
         return;
@@ -224,7 +224,7 @@ static void MouseEvent_SetMouseenter(Node *node, void *callback)
     event_register(node, MOUSEEVENT_ENTER, callback);
 }
 
-static void MouseEvent_SetMouseleave(Node *node, void *callback)
+static void setMouseleave(Node *node, void *callback)
 {
     if (!node || !checkUserdata(node))
         return;
@@ -232,20 +232,20 @@ static void MouseEvent_SetMouseleave(Node *node, void *callback)
     event_register(node, MOUSEEVENT_LEAVE, callback);
 }
 
-static void MouseEvent_SetClickWithUserdata(Node *node, void *userdata, void *callback)
+static void setClickWithUserdata(Node *node, void *userdata, void *callback)
 {
     if (!node)
         return;
     if (!node->event.userdata)
-        MouseEvent_SetUserdata(node, userdata);
+        setUserdata(node, userdata);
 
     node->event.click = callback;
     event_register(node, MOUSEEVENT_CLICK, callback);
 }
 
-static void MouseEvent_SetMultiMouseEvent(Node *node, void *userdata, Event_Userevent *arr, Uint8 count)
+static void setMultiMouseEvent(Node *node, void *userdata, Event_Userevent *arr, Uint8 count)
 {
-    MouseEvent_SetUserdata(node, userdata);
+    setUserdata(node, userdata);
     node->event.userevent_count = count;
 
     node->event.userevent_arr = NULL;
@@ -308,7 +308,7 @@ static void (*const event_dispatch[])(SDL_Renderer *, SDL_Event *, Node *) = {
     mouseleave,      /* MOUSEEVENT_LEAVE */
 };
 
-static void MouseEvent_Handle(SDL_Renderer *renderer, SDL_Event *event, Node *node)
+static void handle(SDL_Renderer *renderer, SDL_Event *event, Node *node)
 {
     if (!renderer || !node || !event)
         return;
@@ -380,7 +380,7 @@ static Node *topmost_hit(SDL_Renderer *renderer, SDL_Event *event, Node *root)
     return NULL;
 }
 
-/* 把世界坐标临时写入 node->rect，调用单节点 MouseEvent_Handle 再还原（复用 enter/leave/click 等逻辑） */
+/* 把世界坐标临时写入 node->rect，调用单节点 handle 再还原（复用 enter/leave/click 等逻辑） */
 static void fire_node(SDL_Renderer *renderer, SDL_Event *event, Node *root, Node *node)
 {
     SDL_FRect wr;
@@ -389,12 +389,12 @@ static void fire_node(SDL_Renderer *renderer, SDL_Event *event, Node *root, Node
 
     SDL_FRect saved = node->rect;
     node->rect = wr;
-    MouseEvent_Handle(renderer, event, node);
+    handle(renderer, event, node);
     node->rect = saved;
 }
 
 /* 构建/重建 root 的事件表：清空 → 后序收集 → z 稳定排序（初始化/改树后调用一次） */
-static void MouseEvent_Build(Node *root)
+static void build(Node *root)
 {
     if (!root)
         return;
@@ -410,7 +410,7 @@ static void MouseEvent_Build(Node *root)
 }
 
 /* 统一分发入口：场景 event() 每帧对其 root 调用一次（内部过滤鼠标事件类型） */
-static void MouseEvent_Dispatch(SDL_Renderer *renderer, SDL_Event *event, Node *root)
+static void dispatch(SDL_Renderer *renderer, SDL_Event *event, Node *root)
 {
     if (!renderer || !event || !root)
         return;
@@ -426,9 +426,9 @@ static void MouseEvent_Dispatch(SDL_Renderer *renderer, SDL_Event *event, Node *
         return;
     }
 
-    /* root 变化（切场景）时自动重建；同 root 内的增删子/可见性变更请调用方再 MouseEvent_Build 一次 */
+    /* root 变化（切场景）时自动重建；同 root 内的增删子/可见性变更请调用方再 build 一次 */
     if (root != s_last_root)
-        MouseEvent_Build(root);
+        build(root);
 
     /* 指针类（move/hover/enter/leave/wheel）：只发给命中的最上层节点，不向下传递 */
     if (event->type == SDL_EVENT_MOUSE_MOTION) {
@@ -467,15 +467,15 @@ static void MouseEvent_Dispatch(SDL_Renderer *renderer, SDL_Event *event, Node *
 }
 
 const MouseEventApi mouseEvent = {
-    .handle = MouseEvent_Handle,
-    .build = MouseEvent_Build,
-    .dispatch = MouseEvent_Dispatch,
-    .setUserdata = MouseEvent_SetUserdata,
-    .setClick = MouseEvent_SetClick,
-    .setRightClick = MouseEvent_SetRightClick,
-    .setMouseenter = MouseEvent_SetMouseenter,
-    .setMouseleave = MouseEvent_SetMouseleave,
-    .setClickWithUserdata = MouseEvent_SetClickWithUserdata,
-    .setMultiMouseEvent = MouseEvent_SetMultiMouseEvent,
-    .setStopPropagation = MouseEvent_SetStopPropagation,
+    .handle = handle,
+    .build = build,
+    .dispatch = dispatch,
+    .setUserdata = setUserdata,
+    .setClick = setClick,
+    .setRightClick = setRightClick,
+    .setMouseenter = setMouseenter,
+    .setMouseleave = setMouseleave,
+    .setClickWithUserdata = setClickWithUserdata,
+    .setMultiMouseEvent = setMultiMouseEvent,
+    .setStopPropagation = setStopPropagation,
 };
